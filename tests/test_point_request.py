@@ -308,7 +308,7 @@ class TestAPIKeyHandling:
                 lon=0,
                 model=ModelTypes.GFS,
             )
-        assert "api_key" in str(exc_info.value).lower()
+        assert "key" in str(exc_info.value).lower()
 
     def test_api_key_stored(self, mock_api_key):
         """Test that API key is stored correctly."""

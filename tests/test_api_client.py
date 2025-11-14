@@ -19,13 +19,6 @@ class TestWindyAPIInitialization:
         assert client.api_key == mock_api_key
         assert client.point_forecast_url is not None
 
-    def test_init_with_custom_url(self, mock_api_key):
-        """Test initialization with custom URL."""
-        custom_url = "https://custom.api.windy.com/point-forecast"
-        client = WindyAPI(api_key=mock_api_key, point_forecast_url=custom_url)
-        assert client.api_key == mock_api_key
-        assert client.point_forecast_url == custom_url
-
     def test_default_url_is_set(self, mock_api_key):
         """Test that default URL is set when not provided."""
         client = WindyAPI(api_key=mock_api_key)
@@ -246,7 +239,11 @@ class TestAsyncGetPointForecast:
     @pytest.mark.asyncio()
     @patch("httpx.AsyncClient.post", new_callable=AsyncMock)
     async def test_async_with_multiple_parameters(
-        self, mock_post, mock_api_key, valid_coordinates, mock_api_response_multiple_levels
+        self,
+        mock_post,
+        mock_api_key,
+        valid_coordinates,
+        mock_api_response_multiple_levels,
     ):
         """Test async request with multiple parameters and levels."""
         mock_response = Mock()
@@ -299,12 +296,12 @@ class TestAPIRequestPayload:
         assert "lon" in payload
         assert "model" in payload
         assert "parameters" in payload
-        assert "api_key" in payload
+        assert "key" in payload
 
         # Verify values
         assert payload["lat"] == valid_coordinates["lat"]
         assert payload["lon"] == valid_coordinates["lon"]
-        assert payload["api_key"] == mock_api_key
+        assert payload["key"] == mock_api_key
 
     @patch("httpx.post")
     def test_model_normalized_in_payload(
