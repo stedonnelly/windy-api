@@ -4,7 +4,7 @@
 [![PyPI version][pypi-version]][pypi-link]
 [![PyPI platforms][pypi-platforms]][pypi-link]
 
-Python Windy API package for interacting with the Windy API.
+Python Windy API package for interacting with the Windy API. Currently only supports access to the point forecast API.
 
 ## Installation
 
