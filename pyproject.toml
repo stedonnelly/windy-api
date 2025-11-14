@@ -3,7 +3,7 @@ requires = ["setuptools>=61"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "Windy API"
+name = "windy-api"
 version = "0.1.0"
 authors = [
   { name = "Dr. Shaun T. E. Donnelly", email = "shaun.t.e.donnelly@gmail.com" },
