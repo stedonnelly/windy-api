@@ -75,6 +75,10 @@ disallow_incomplete_defs = false
 check_untyped_defs = true
 strict = false
 
+[[tool.mypy.overrides]]
+module = "windy_api._version"
+ignore_missing_imports = true
+
 
 [tool.ruff]
 src = ["src"]
