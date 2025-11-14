@@ -7,7 +7,7 @@ from __future__ import annotations
 from .api import WindyAPI
 
 try:
-    from windy_api._version import version as __version__
+    from windy_api._version import version as __version__  # type: ignore[import-not-found]
 except ImportError:
     # Package not installed or setuptools-scm not run yet
     from importlib.metadata import version
