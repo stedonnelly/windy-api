@@ -102,7 +102,8 @@ class WindyPointRequest(BaseModel):
         normalized = model_map.get(str(v).lower().replace("-", " "))
         if not normalized:
             valid_models = ", ".join(f"'{e.value}'" for e in ModelTypes)
-            raise ValueError(f"Unknown model: '{v}'. Valid options: {valid_models}")
+            err_str = f"Unknown model: '{v}'. Valid options: {valid_models}"
+            raise ValueError(err_str)
         return normalized
 
     @field_validator("parameters", mode="before")
