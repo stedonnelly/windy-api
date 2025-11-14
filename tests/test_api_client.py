@@ -78,7 +78,7 @@ class TestSyncGetPointForecast:
             latitude=valid_coordinates["lat"],
             longitude=valid_coordinates["lon"],
             model=ModelTypes.ICONEU,
-            parameters=["temp", "wind", "precip", "cloudcover"],
+            parameters=["temp", "wind", "precip", "windGust"],
         )
 
         assert isinstance(result, WindyForecastResponse)

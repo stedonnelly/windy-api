@@ -22,23 +22,26 @@ class WindyAPI:
         longitude: float,
         model: ModelTypes,
         parameters: list[ValidParameters],
+        levels: list[Levels] | None = None,
     ) -> WindyForecastResponse:
         """Fetch point weather forecast data.
 
         Args:
             latitude (float): Latitude coordinate between -90 and 90.
             longitude (float): Longitude coordinate between -180 and 180.
-            model (str): Weather model to use for the forecast.
-            parameters (list[str]): List of weather parameters to include in the forecast.
+            model (ModelTypes): Weather model to use for the forecast.
+            parameters (list[ValidParameters]): List of weather parameters to include in the forecast
+            levels (list[Levels], optional): List of atmospheric levels.
 
         Returns:
             WindyForecastResponse: Weather forecast response data.
-        """
+        """  # noqa: E501
         request_data = WindyPointRequest(
             lat=latitude,
             lon=longitude,
             model=model,
             parameters=parameters,
+            levels=levels or [Levels.SURFACE],
             key=self.api_key,
         )
         response = httpx.post(self.point_forecast_url, json=request_data.model_dump())

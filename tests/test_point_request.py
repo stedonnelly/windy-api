@@ -193,15 +193,16 @@ class TestParameterHandling:
             "dewpoint",
             "rh",
             "pressure",
-            "cloudcover",
             "precip",
+            "convPrecip",
+            "snowPrecip",
             "ptype",
-            "snowcover",
             "lclouds",
             "mclouds",
             "hclouds",
-            "visibility",
-            "gust",
+            "windGust",
+            "cape",
+            "gh",
         ],
     )
     def test_all_valid_parameters(self, param, mock_api_key):
@@ -213,7 +214,7 @@ class TestParameterHandling:
             parameters=[param],
             key=mock_api_key,
         )
-        assert param in request.parameters
+        assert param.lower() in request.parameters
 
 
 class TestLevelsHandling:
