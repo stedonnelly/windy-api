@@ -33,7 +33,7 @@ jobs:
   publish:
     needs: [dist]
     name: Publish to PyPI
-    environment: testpypi
+    environment: pypi
     permissions:
       id-token: write
     runs-on: ubuntu-latest
@@ -49,5 +49,5 @@ jobs:
         if: github.event_name == 'release' && github.event.action == 'published'
         with:
           # Remove this line to publish to PyPI
-          repository-url: https://test.pypi.org/legacy/
+          # repository-url: https://test.pypi.org/legacy/
           verbose: true
