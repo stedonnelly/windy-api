@@ -50,3 +50,4 @@ jobs:
         with:
           # Remove this line to publish to PyPI
           repository-url: https://test.pypi.org/legacy/
+          verbose: true
