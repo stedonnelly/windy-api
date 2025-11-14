@@ -19,12 +19,8 @@ class WindyForecastResponse(BaseModel):
 
     model_config = ConfigDict(extra="allow")  # Allow dynamic parameter-level fields
 
-    ts: list[datetime] = Field(
-        description="Timestamps converted from milliseconds since epoch"
-    )
-    units: dict[str, str | None] = Field(
-        description="Units for each parameter-level combination"
-    )
+    ts: list[datetime] = Field(description="Timestamps converted from milliseconds since epoch")
+    units: dict[str, str | None] = Field(description="Units for each parameter-level combination")
 
     @field_validator("ts", mode="before")
     @classmethod

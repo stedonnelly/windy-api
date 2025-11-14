@@ -58,9 +58,7 @@ class WindyPointRequest(BaseModel):
 
     lat: float = Field(ge=-90, le=90, description="Latitude coordinate")
     lon: float = Field(ge=-180, le=180, description="Longitude coordinate")
-    model: str | ModelTypes = Field(
-        default=ModelTypes.GFS, description="Forecast model to use"
-    )
+    model: str | ModelTypes = Field(default=ModelTypes.GFS, description="Forecast model to use")
     parameters: list[str] = Field(
         default_factory=lambda: ["temp", "wind"],
         description="Parameters to retrieve from the forecast",
