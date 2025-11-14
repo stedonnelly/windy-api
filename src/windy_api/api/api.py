@@ -32,7 +32,7 @@ class WindyAPI:
             lon=longitude,
             model=model,
             parameters=parameters,
-            key=self.api_key,
+            api_key=self.api_key,
         )
         response = httpx.post(self.point_forecast_url, json=request_data.model_dump())
         response.raise_for_status()
@@ -57,7 +57,7 @@ class WindyAPI:
             lon=longitude,
             model=model,
             parameters=parameters,
-            key=self.api_key,
+            api_key=self.api_key,
         )
         async with httpx.AsyncClient() as client:
             response = await client.post(self.point_forecast_url, json=request_data.model_dump())

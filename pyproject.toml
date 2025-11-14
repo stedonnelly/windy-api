@@ -36,6 +36,7 @@ dependencies = [
 dev = [
   "pytest >=6",
   "pytest-cov >=3",
+  "pytest-asyncio >=0.21",
   "pre-commit",
 ]
 
@@ -45,7 +46,7 @@ Homepage = "https://github.com/stedonnelly/windy-api"
 Discussions = "https://github.com/stedonnelly/windy-api/discussions"
 Changelog = "https://github.com/stedonnelly/windy-api/releases"
 
-[tool.pytest.ini_options]
+[tool.pytest]
 minversion = "6.0"
 addopts = ["-ra", "--showlocals", "--strict-markers", "--strict-config"]
 xfail_strict = true
