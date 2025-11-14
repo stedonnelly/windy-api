@@ -15,7 +15,7 @@ python -m pip install windy_api
 From source:
 ```bash
 git clone https://github.com/stedonnelly/windy-api
-cd Windy API
+cd windy-api
 python -m pip install .
 ```
 
@@ -34,7 +34,7 @@ Distributed under the terms of the [MIT license](LICENSE).
 <!-- prettier-ignore-start -->
 [actions-badge]:            https://github.com/stedonnelly/windy-api/workflows/CI/badge.svg
 [actions-link]:             https://github.com/stedonnelly/windy-api/actions
-[pypi-link]:                https://pypi.org/project/Windy API/
-[pypi-platforms]:           https://img.shields.io/pypi/pyversions/Windy API
-[pypi-version]:             https://img.shields.io/pypi/v/Windy API
+[pypi-link]:                https://pypi.org/project/windy-api/
+[pypi-platforms]:           https://img.shields.io/pypi/pyversions/windy-api
+[pypi-version]:             https://img.shields.io/pypi/v/windy-api
 <!-- prettier-ignore-end -->
