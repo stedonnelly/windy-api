@@ -117,6 +117,6 @@ class WindyPointRequest(BaseModel):
             if isinstance(param, ValidParameters):
                 normalized.append(param.value)
             else:
-                # Accept the string as-is and let the model validator check compatibility
-                normalized.append(str(param).lower())
+                # Accept the string as-is and let Pydantic validate against enum
+                normalized.append(str(param))
         return normalized

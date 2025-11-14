@@ -214,7 +214,7 @@ class TestParameterHandling:
             parameters=[param],
             key=mock_api_key,
         )
-        assert param.lower() in request.parameters
+        assert param in request.parameters
 
 
 class TestLevelsHandling:
