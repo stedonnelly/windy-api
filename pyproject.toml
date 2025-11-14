@@ -1,10 +1,10 @@
 [build-system]
-requires = ["setuptools>=61"]
+requires = ["setuptools>=61", "setuptools-scm>=8.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "windy-api"
-version = "0.1.0a2"
+dynamic = ["version"]
 authors = [
   { name = "Shaun T. E. Donnelly", email = "shaun.t.e.donnelly@gmail.com" },
 ]
@@ -115,3 +115,6 @@ unfixable = [
   "F841",   # Would remove unused variables
 ]
 flake8-unused-arguments.ignore-variadic-names = true  # allow unused *args/**kwargsisort.required-imports = ["from __future__ import annotations"]
+
+[tool.setuptools_scm]
+write_to = "src/windy_api/_version.py"
