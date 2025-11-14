@@ -4,6 +4,8 @@ Windy API: Python Windy API package for interacting with the Windy API.
 
 from __future__ import annotations
 
+from .api import WindyAPI
+
 try:
     from windy_api._version import version as __version__
 except ImportError:
@@ -12,4 +14,4 @@ except ImportError:
 
     __version__ = version(__name__)
 
-__all__ = ("__version__",)
+__all__ = ("__version__", "WindyAPI")
