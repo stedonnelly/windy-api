@@ -1,5 +1,5 @@
 """
-Windy API Wrapper: Python Windy API package for interacting with the Windy API.
+Windy API: Python Windy API package for interacting with the Windy API.
 """
 
 from __future__ import annotations

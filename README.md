@@ -1,4 +1,4 @@
-# Windy API Wrapper
+# Windy API
 
 [![Actions Status][actions-badge]][actions-link]
 [![PyPI version][pypi-version]][pypi-link]
