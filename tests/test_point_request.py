@@ -20,7 +20,7 @@ class TestWindyPointRequestValidation:
             lat=valid_coordinates["lat"],
             lon=valid_coordinates["lon"],
             model=ModelTypes.GFS,
-            api_key=mock_api_key,
+            key=mock_api_key,
         )
         assert request.lat == valid_coordinates["lat"]
         assert request.lon == valid_coordinates["lon"]
@@ -35,7 +35,7 @@ class TestWindyPointRequestValidation:
             lat=lat,
             lon=0,
             model=ModelTypes.GFS,
-            api_key=mock_api_key,
+            key=mock_api_key,
         )
         assert request.lat == lat
 
@@ -50,7 +50,7 @@ class TestWindyPointRequestValidation:
                 lat=lat,
                 lon=0,
                 model=ModelTypes.GFS,
-                api_key=mock_api_key,
+                key=mock_api_key,
             )
         assert "lat" in str(exc_info.value).lower()
 
@@ -64,7 +64,7 @@ class TestWindyPointRequestValidation:
             lat=0,
             lon=lon,
             model=ModelTypes.GFS,
-            api_key=mock_api_key,
+            key=mock_api_key,
         )
         assert request.lon == lon
 
@@ -79,7 +79,7 @@ class TestWindyPointRequestValidation:
                 lat=0,
                 lon=lon,
                 model=ModelTypes.GFS,
-                api_key=mock_api_key,
+                key=mock_api_key,
             )
         assert "lon" in str(exc_info.value).lower()
 
@@ -109,7 +109,7 @@ class TestModelNormalization:
             lat=0,
             lon=0,
             model=input_model,
-            api_key=mock_api_key,
+            key=mock_api_key,
         )
         assert request.model == expected
 
@@ -120,7 +120,7 @@ class TestModelNormalization:
                 lat=0,
                 lon=0,
                 model="invalid_model",
-                api_key=mock_api_key,
+                key=mock_api_key,
             )
 
     def test_model_enum_usage(self, mock_api_key):
@@ -129,7 +129,7 @@ class TestModelNormalization:
             lat=0,
             lon=0,
             model=ModelTypes.ICONEU,
-            api_key=mock_api_key,
+            key=mock_api_key,
         )
         assert request.model == "iconeu"
 
@@ -143,7 +143,7 @@ class TestParameterHandling:
             lat=0,
             lon=0,
             model=ModelTypes.GFS,
-            api_key=mock_api_key,
+            key=mock_api_key,
         )
         # Check defaults are set
         assert request.parameters is not None
@@ -156,7 +156,7 @@ class TestParameterHandling:
             lon=0,
             model=ModelTypes.GFS,
             parameters=["temp"],
-            api_key=mock_api_key,
+            key=mock_api_key,
         )
         assert "temp" in request.parameters
 
@@ -168,7 +168,7 @@ class TestParameterHandling:
             lon=0,
             model=ModelTypes.GFS,
             parameters=params,
-            api_key=mock_api_key,
+            key=mock_api_key,
         )
         for param in params:
             assert param in request.parameters
@@ -180,7 +180,7 @@ class TestParameterHandling:
             lon=0,
             model=ModelTypes.GFS,
             parameters=[ValidParameters.TEMP, ValidParameters.DEWPOINT],
-            api_key=mock_api_key,
+            key=mock_api_key,
         )
         assert "temp" in request.parameters
         assert "dewpoint" in request.parameters
@@ -211,7 +211,7 @@ class TestParameterHandling:
             lon=0,
             model=ModelTypes.GFS,
             parameters=[param],
-            api_key=mock_api_key,
+            key=mock_api_key,
         )
         assert param in request.parameters
 
@@ -225,7 +225,7 @@ class TestLevelsHandling:
             lat=0,
             lon=0,
             model=ModelTypes.GFS,
-            api_key=mock_api_key,
+            key=mock_api_key,
         )
         # Check defaults are set
         assert request.levels is not None
@@ -237,7 +237,7 @@ class TestLevelsHandling:
             lon=0,
             model=ModelTypes.GFS,
             levels=["surface"],
-            api_key=mock_api_key,
+            key=mock_api_key,
         )
         assert "surface" in request.levels
 
@@ -249,7 +249,7 @@ class TestLevelsHandling:
             lon=0,
             model=ModelTypes.GFS,
             levels=levels,
-            api_key=mock_api_key,
+            key=mock_api_key,
         )
         for level in levels:
             assert level in request.levels
@@ -261,7 +261,7 @@ class TestLevelsHandling:
             lon=0,
             model=ModelTypes.GFS,
             levels=[Levels.SURFACE, Levels.H850, Levels.H500],
-            api_key=mock_api_key,
+            key=mock_api_key,
         )
         assert "surface" in request.levels
         assert "850h" in request.levels
@@ -292,7 +292,7 @@ class TestLevelsHandling:
             lon=0,
             model=ModelTypes.GFS,
             levels=[level],
-            api_key=mock_api_key,
+            key=mock_api_key,
         )
         assert level in request.levels
 
@@ -316,6 +316,6 @@ class TestAPIKeyHandling:
             lat=0,
             lon=0,
             model=ModelTypes.GFS,
-            api_key=mock_api_key,
+            key=mock_api_key,
         )
-        assert request.api_key == mock_api_key
+        assert request.key == mock_api_key

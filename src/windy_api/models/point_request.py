@@ -67,7 +67,7 @@ class WindyPointRequest(BaseModel):
         default_factory=lambda: [Levels.SURFACE],
         description="Atmospheric levels (e.g., 'surface', '850h')",
     )
-    api_key: str = Field(description="Your Windy API key")
+    key: str = Field(description="Your Windy API key")
 
     @field_validator("model", mode="before")
     @classmethod

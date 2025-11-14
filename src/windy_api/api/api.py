@@ -7,11 +7,9 @@ from windy_api.schema.schema import WindyForecastResponse
 class WindyAPI:
     """Windy API client for fetching weather forecast data."""
 
-    def __init__(self, api_key: str, point_forecast_url: str | None = None):
+    def __init__(self, api_key: str):
         self.api_key = api_key
-        self.point_forecast_url = (
-            point_forecast_url or "https://api.windy.com/api/point-forecast/v2"
-        )
+        self.point_forecast_url = "https://api.windy.com/api/point-forecast/v2"
 
     def get_point_forecast(
         self, latitude: float, longitude: float, model: str, parameters: list[str]
@@ -32,8 +30,9 @@ class WindyAPI:
             lon=longitude,
             model=model,
             parameters=parameters,
-            api_key=self.api_key,
+            key=self.api_key,
         )
+        print(request_data)
         response = httpx.post(self.point_forecast_url, json=request_data.model_dump())
         response.raise_for_status()
         return WindyForecastResponse(**response.json())
@@ -57,7 +56,7 @@ class WindyAPI:
             lon=longitude,
             model=model,
             parameters=parameters,
-            api_key=self.api_key,
+            key=self.api_key,
         )
         async with httpx.AsyncClient() as client:
             response = await client.post(self.point_forecast_url, json=request_data.model_dump())
