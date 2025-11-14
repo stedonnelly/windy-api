@@ -41,7 +41,6 @@ class WindyAPI:
             parameters=parameters,
             key=self.api_key,
         )
-        print(request_data)
         response = httpx.post(self.point_forecast_url, json=request_data.model_dump())
         response.raise_for_status()
         return WindyForecastResponse(**response.json())
