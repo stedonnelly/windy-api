@@ -27,7 +27,10 @@ classifiers = [
   "Topic :: Scientific/Engineering",
   "Typing :: Typed",
 ]
-dependencies = []
+dependencies = [
+  "httpx >=0.24.1",
+  "pydantic >=2.7.2",
+]
 
 [project.optional-dependencies]
 dev = [
