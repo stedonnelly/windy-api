@@ -24,7 +24,7 @@ python -m pip install .
 ### Quick Start
 
 ```python
-from windy_api.api.api import WindyAPI
+from windy_api import WindyAPI
 
 # Initialize the client with your API key
 api = WindyAPI(api_key="your_api_key_here")
@@ -117,7 +117,7 @@ wind_gust = response.get_data("windGust-surface")
 
 ```python
 import asyncio
-from windy_api.api.api import WindyAPI
+from windy_api import WindyAPI
 
 async def get_forecasts():
     api = WindyAPI(api_key="your_api_key_here")
@@ -140,7 +140,7 @@ responses = asyncio.run(get_forecasts())
 ```python
 import os
 from dotenv import load_dotenv
-from windy_api.api.api import WindyAPI
+from windy_api import WindyAPI
 
 # Load API key from .env file
 load_dotenv()
