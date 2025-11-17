@@ -6,7 +6,7 @@ import httpx
 import pytest
 
 from windy_api.api.api import WindyAPI
-from windy_api.models.point_request import ModelTypes
+from windy_api.models.point_request import ModelTypes, ValidParameters
 from windy_api.schema.schema import WindyForecastResponse
 
 
@@ -49,7 +49,7 @@ class TestSyncGetPointForecast:
             latitude=valid_coordinates["lat"],
             longitude=valid_coordinates["lon"],
             model=ModelTypes.GFS,
-            parameters=["temp", "wind"],
+            parameters=[ValidParameters.TEMP, ValidParameters.WIND],
         )
 
         # Verify result
@@ -78,7 +78,12 @@ class TestSyncGetPointForecast:
             latitude=valid_coordinates["lat"],
             longitude=valid_coordinates["lon"],
             model=ModelTypes.ICONEU,
-            parameters=["temp", "wind", "precip", "windGust"],
+            parameters=[
+                ValidParameters.TEMP,
+                ValidParameters.WIND,
+                ValidParameters.PRECIP,
+                ValidParameters.WIND_GUST,
+            ],
         )
 
         assert isinstance(result, WindyForecastResponse)
@@ -102,7 +107,7 @@ class TestSyncGetPointForecast:
                 latitude=valid_coordinates["lat"],
                 longitude=valid_coordinates["lon"],
                 model=ModelTypes.GFS,
-                parameters=["temp"],
+                parameters=[ValidParameters.TEMP],
             )
 
     @patch("httpx.post")
@@ -118,7 +123,7 @@ class TestSyncGetPointForecast:
                 latitude=valid_coordinates["lat"],
                 longitude=valid_coordinates["lon"],
                 model=ModelTypes.GFS,
-                parameters=["temp"],
+                parameters=[ValidParameters.TEMP],
             )
 
     @patch("httpx.post")
@@ -137,7 +142,7 @@ class TestSyncGetPointForecast:
                 latitude=valid_coordinates["lat"],
                 longitude=valid_coordinates["lon"],
                 model=ModelTypes.GFS,
-                parameters=["temp"],
+                parameters=[ValidParameters.TEMP],
             )
 
     @patch("httpx.post")
@@ -156,7 +161,7 @@ class TestSyncGetPointForecast:
             latitude=lat,
             longitude=lon,
             model=ModelTypes.GFS,
-            parameters=["temp"],
+            parameters=[ValidParameters.TEMP],
         )
 
         # Check that coordinates were included in request
@@ -188,7 +193,7 @@ class TestAsyncGetPointForecast:
             latitude=valid_coordinates["lat"],
             longitude=valid_coordinates["lon"],
             model=ModelTypes.GFS,
-            parameters=["temp", "wind"],
+            parameters=[ValidParameters.TEMP, ValidParameters.WIND],
         )
 
         # Verify result
@@ -217,7 +222,7 @@ class TestAsyncGetPointForecast:
                 latitude=valid_coordinates["lat"],
                 longitude=valid_coordinates["lon"],
                 model=ModelTypes.GFS,
-                parameters=["temp"],
+                parameters=[ValidParameters.TEMP],
             )
 
     @pytest.mark.asyncio()
@@ -233,7 +238,7 @@ class TestAsyncGetPointForecast:
                 latitude=valid_coordinates["lat"],
                 longitude=valid_coordinates["lon"],
                 model=ModelTypes.GFS,
-                parameters=["temp"],
+                parameters=[ValidParameters.TEMP],
             )
 
     @pytest.mark.asyncio()
@@ -257,7 +262,7 @@ class TestAsyncGetPointForecast:
             latitude=valid_coordinates["lat"],
             longitude=valid_coordinates["lon"],
             model=ModelTypes.GFS,
-            parameters=["temp", "wind"],
+            parameters=[ValidParameters.TEMP, ValidParameters.WIND],
         )
 
         assert isinstance(result, WindyForecastResponse)
@@ -284,7 +289,7 @@ class TestAPIRequestPayload:
             latitude=valid_coordinates["lat"],
             longitude=valid_coordinates["lon"],
             model=ModelTypes.GFS,
-            parameters=["temp", "wind"],
+            parameters=[ValidParameters.TEMP, ValidParameters.WIND],
         )
 
         # Extract the JSON payload from the call
@@ -304,10 +309,10 @@ class TestAPIRequestPayload:
         assert payload["key"] == mock_api_key
 
     @patch("httpx.post")
-    def test_model_normalized_in_payload(
+    def test_model_value_in_payload(
         self, mock_post, mock_api_key, valid_coordinates, mock_api_response_data
     ):
-        """Test that model names are normalized in the payload."""
+        """Test that model enum values are correctly serialized in the payload."""
         mock_response = Mock()
         mock_response.status_code = 200
         mock_response.json.return_value = mock_api_response_data
@@ -318,14 +323,14 @@ class TestAPIRequestPayload:
         client.get_point_forecast(
             latitude=valid_coordinates["lat"],
             longitude=valid_coordinates["lon"],
-            model="ICON-EU",  # Test with hyphenated, uppercase version
-            parameters=["temp"],
+            model=ModelTypes.ICONEU,
+            parameters=[ValidParameters.TEMP],
         )
 
-        # Verify model was normalized
+        # Verify model enum value was serialized correctly
         call_kwargs = mock_post.call_args.kwargs
         payload = call_kwargs.get("json", {})
-        assert payload["model"] == "iconeu"  # Should be normalized
+        assert payload["model"] == "iconEu"  # Should be the enum value
 
 
 class TestEdgeCases:

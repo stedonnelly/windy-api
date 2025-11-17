@@ -84,54 +84,41 @@ class TestWindyPointRequestValidation:
         assert "lon" in str(exc_info.value).lower()
 
 
-class TestModelNormalization:
-    """Test model name normalization."""
+class TestModelValidation:
+    """Test model validation."""
 
     @pytest.mark.parametrize(
-        ("input_model", "expected"),
+        "model",
         [
-            ("GFS", "gfs"),
-            ("gfs", "gfs"),
-            ("Gfs", "gfs"),
-            ("icon-eu", "iconeu"),
-            ("icon_eu", "iconeu"),
-            ("ICON-EU", "iconeu"),
-            ("ICONEU", "iconeu"),
-            ("gfs-wave", "gfs_wave"),
-            ("GFS_WAVE", "gfs_wave"),
-            ("nam-conus", "namconus"),
-            ("NAM_CONUS", "namconus"),
+            ModelTypes.AROME,
+            ModelTypes.ICONEU,
+            ModelTypes.GFS,
+            ModelTypes.GFS_WAVE,
+            ModelTypes.NAMCONUS,
+            ModelTypes.NAMHAWAII,
+            ModelTypes.NAMALASKA,
+            ModelTypes.CAMS,
         ],
     )
-    def test_model_normalization(self, input_model, expected, mock_api_key):
-        """Test that model names are normalized correctly."""
+    def test_all_model_types(self, model, mock_api_key):
+        """Test that all ModelTypes enum values are accepted."""
         request = WindyPointRequest(
             lat=0,
             lon=0,
-            model=input_model,
+            model=model,
             key=mock_api_key,
         )
-        assert request.model == expected
+        assert request.model == model.value
 
-    def test_invalid_model_name(self, mock_api_key):
-        """Test that invalid model names raise ValueError."""
-        with pytest.raises(ValueError, match="(?i)unknown model"):
+    def test_invalid_model_raises_validation_error(self, mock_api_key):
+        """Test that invalid model raises ValidationError."""
+        with pytest.raises(ValidationError):
             WindyPointRequest(
                 lat=0,
                 lon=0,
                 model="invalid_model",
                 key=mock_api_key,
             )
-
-    def test_model_enum_usage(self, mock_api_key):
-        """Test using ModelTypes enum directly."""
-        request = WindyPointRequest(
-            lat=0,
-            lon=0,
-            model=ModelTypes.ICONEU,
-            key=mock_api_key,
-        )
-        assert request.model == "iconeu"
 
 
 class TestParameterHandling:
@@ -149,20 +136,20 @@ class TestParameterHandling:
         assert request.parameters is not None
         assert len(request.parameters) > 0
 
-    def test_single_parameter_string(self, mock_api_key):
-        """Test passing a single parameter as string."""
+    def test_single_parameter_enum(self, mock_api_key):
+        """Test passing a single parameter as enum."""
         request = WindyPointRequest(
             lat=0,
             lon=0,
             model=ModelTypes.GFS,
-            parameters=["temp"],
+            parameters=[ValidParameters.TEMP],
             key=mock_api_key,
         )
         assert "temp" in request.parameters
 
     def test_multiple_parameters_list(self, mock_api_key):
         """Test passing multiple parameters as list."""
-        params = ["temp", "wind", "precip"]
+        params = [ValidParameters.TEMP, ValidParameters.WIND, ValidParameters.PRECIP]
         request = WindyPointRequest(
             lat=0,
             lon=0,
@@ -170,8 +157,9 @@ class TestParameterHandling:
             parameters=params,
             key=mock_api_key,
         )
-        for param in params:
-            assert param in request.parameters
+        assert "temp" in request.parameters
+        assert "wind" in request.parameters
+        assert "precip" in request.parameters
 
     def test_parameters_enum_usage(self, mock_api_key):
         """Test using ValidParameters enum."""
@@ -188,21 +176,21 @@ class TestParameterHandling:
     @pytest.mark.parametrize(
         "param",
         [
-            "temp",
-            "wind",
-            "dewpoint",
-            "rh",
-            "pressure",
-            "precip",
-            "convPrecip",
-            "snowPrecip",
-            "ptype",
-            "lclouds",
-            "mclouds",
-            "hclouds",
-            "windGust",
-            "cape",
-            "gh",
+            ValidParameters.TEMP,
+            ValidParameters.WIND,
+            ValidParameters.DEWPOINT,
+            ValidParameters.RH,
+            ValidParameters.PRESSURE,
+            ValidParameters.PRECIP,
+            ValidParameters.CONV_PRECIP,
+            ValidParameters.SNOW_PRECIP,
+            ValidParameters.PTYPE,
+            ValidParameters.LCLOUDS,
+            ValidParameters.MCLOUDS,
+            ValidParameters.HCLOUDS,
+            ValidParameters.WIND_GUST,
+            ValidParameters.CAPE,
+            ValidParameters.GH,
         ],
     )
     def test_all_valid_parameters(self, param, mock_api_key):
@@ -214,7 +202,7 @@ class TestParameterHandling:
             parameters=[param],
             key=mock_api_key,
         )
-        assert param in request.parameters
+        assert param.value in request.parameters
 
 
 class TestLevelsHandling:
@@ -231,20 +219,20 @@ class TestLevelsHandling:
         # Check defaults are set
         assert request.levels is not None
 
-    def test_single_level_string(self, mock_api_key):
-        """Test passing a single level as string."""
+    def test_single_level_enum(self, mock_api_key):
+        """Test passing a single level as enum."""
         request = WindyPointRequest(
             lat=0,
             lon=0,
             model=ModelTypes.GFS,
-            levels=["surface"],
+            levels=[Levels.SURFACE],
             key=mock_api_key,
         )
         assert "surface" in request.levels
 
     def test_multiple_levels_list(self, mock_api_key):
         """Test passing multiple levels as list."""
-        levels = ["surface", "850h", "500h"]
+        levels = [Levels.SURFACE, Levels.H850, Levels.H500]
         request = WindyPointRequest(
             lat=0,
             lon=0,
@@ -252,8 +240,9 @@ class TestLevelsHandling:
             levels=levels,
             key=mock_api_key,
         )
-        for level in levels:
-            assert level in request.levels
+        assert "surface" in request.levels
+        assert "850h" in request.levels
+        assert "500h" in request.levels
 
     def test_levels_enum_usage(self, mock_api_key):
         """Test using Levels enum."""
@@ -271,19 +260,20 @@ class TestLevelsHandling:
     @pytest.mark.parametrize(
         "level",
         [
-            "surface",
-            "1000h",
-            "950h",
-            "925h",
-            "900h",
-            "850h",
-            "800h",
-            "700h",
-            "600h",
-            "500h",
-            "300h",
-            "200h",
-            "150h",
+            Levels.SURFACE,
+            Levels.H1000,
+            Levels.H950,
+            Levels.H925,
+            Levels.H900,
+            Levels.H850,
+            Levels.H800,
+            Levels.H700,
+            Levels.H600,
+            Levels.H500,
+            Levels.H400,
+            Levels.H300,
+            Levels.H200,
+            Levels.H150,
         ],
     )
     def test_all_valid_levels(self, level, mock_api_key):
@@ -295,7 +285,7 @@ class TestLevelsHandling:
             levels=[level],
             key=mock_api_key,
         )
-        assert level in request.levels
+        assert level.value in request.levels
 
 
 class TestAPIKeyHandling:
@@ -320,3 +310,106 @@ class TestAPIKeyHandling:
             key=mock_api_key,
         )
         assert request.key == mock_api_key
+
+
+class TestModelSpecificParameters:
+    """Test model-specific parameter availability validation."""
+
+    def test_wave_parameters_valid_for_gfs_wave(self, mock_api_key):
+        """Test that wave parameters are accepted for GFS Wave model."""
+        request = WindyPointRequest(
+            lat=0,
+            lon=0,
+            model=ModelTypes.GFS_WAVE,
+            parameters=[
+                ValidParameters.TEMP,
+                ValidParameters.WAVES,
+                ValidParameters.WIND_WAVES,
+                ValidParameters.SWELL1,
+            ],
+            key=mock_api_key,
+        )
+        assert "waves" in request.parameters
+        assert "windWaves" in request.parameters
+        assert "swell1" in request.parameters
+
+    def test_wave_parameters_invalid_for_gfs(self, mock_api_key):
+        """Test that wave parameters are rejected for non-wave models."""
+        with pytest.raises(ValueError, match="not available for model"):
+            WindyPointRequest(
+                lat=0,
+                lon=0,
+                model=ModelTypes.GFS,
+                parameters=[ValidParameters.WAVES],
+                key=mock_api_key,
+            )
+
+    def test_wave_parameters_invalid_for_iconeu(self, mock_api_key):
+        """Test that wave parameters are rejected for ICON EU model."""
+        with pytest.raises(ValueError, match="not available for model"):
+            WindyPointRequest(
+                lat=0,
+                lon=0,
+                model=ModelTypes.ICONEU,
+                parameters=[ValidParameters.WIND_WAVES, ValidParameters.SWELL2],
+                key=mock_api_key,
+            )
+
+    def test_atmospheric_parameters_valid_for_cams(self, mock_api_key):
+        """Test that atmospheric parameters are accepted for CAMS model."""
+        request = WindyPointRequest(
+            lat=0,
+            lon=0,
+            model=ModelTypes.CAMS,
+            parameters=[
+                ValidParameters.TEMP,
+                ValidParameters.SO2SM,
+                ValidParameters.DUSTSM,
+                ValidParameters.COSC,
+            ],
+            key=mock_api_key,
+        )
+        assert "so2sm" in request.parameters
+        assert "dustsm" in request.parameters
+        assert "cosc" in request.parameters
+
+    def test_atmospheric_parameters_invalid_for_gfs(self, mock_api_key):
+        """Test that atmospheric parameters are rejected for non-CAMS models."""
+        with pytest.raises(ValueError, match="not available for model"):
+            WindyPointRequest(
+                lat=0,
+                lon=0,
+                model=ModelTypes.GFS,
+                parameters=[ValidParameters.SO2SM],
+                key=mock_api_key,
+            )
+
+    def test_common_parameters_valid_for_all_models(self, mock_api_key):
+        """Test that common parameters work for all models."""
+        common_params = [ValidParameters.TEMP, ValidParameters.WIND, ValidParameters.PRESSURE]
+
+        for model in ModelTypes:
+            request = WindyPointRequest(
+                lat=0,
+                lon=0,
+                model=model,
+                parameters=common_params,
+                key=mock_api_key,
+            )
+            assert "temp" in request.parameters
+            assert "wind" in request.parameters
+            assert "pressure" in request.parameters
+
+    def test_arome_model_with_common_parameters(self, mock_api_key):
+        """Test AROME model accepts common parameters."""
+        request = WindyPointRequest(
+            lat=48.8566,  # Paris
+            lon=2.3522,
+            model=ModelTypes.AROME,
+            parameters=[ValidParameters.TEMP, ValidParameters.WIND, ValidParameters.RH],
+            key=mock_api_key,
+        )
+        assert request.model == "arome"
+        assert "temp" in request.parameters
+        assert "wind" in request.parameters
+        assert "rh" in request.parameters
