@@ -83,24 +83,25 @@ class TestModelValidation:
     """Test model validation."""
 
     @pytest.mark.parametrize(
-        "model",
+        ("model", "parameters"),
         [
-            ModelTypes.AROME,
-            ModelTypes.ICONEU,
-            ModelTypes.GFS,
-            ModelTypes.GFS_WAVE,
-            ModelTypes.NAMCONUS,
-            ModelTypes.NAMHAWAII,
-            ModelTypes.NAMALASKA,
-            ModelTypes.CAMS,
+            (ModelTypes.AROME, [ValidParameters.TEMP, ValidParameters.WIND]),
+            (ModelTypes.ICONEU, [ValidParameters.TEMP, ValidParameters.WIND]),
+            (ModelTypes.GFS, [ValidParameters.TEMP, ValidParameters.WIND]),
+            (ModelTypes.GFS_WAVE, [ValidParameters.WAVES, ValidParameters.SWELL1]),
+            (ModelTypes.NAMCONUS, [ValidParameters.TEMP, ValidParameters.WIND]),
+            (ModelTypes.NAMHAWAII, [ValidParameters.TEMP, ValidParameters.WIND]),
+            (ModelTypes.NAMALASKA, [ValidParameters.TEMP, ValidParameters.WIND]),
+            (ModelTypes.CAMS, [ValidParameters.COSC, ValidParameters.DUSTSM]),
         ],
     )
-    def test_all_model_types(self, model, mock_api_key):
+    def test_all_model_types(self, model, parameters, mock_api_key):
         """Test that all ModelTypes enum values are accepted."""
         request = WindyPointRequest(
             lat=0,
             lon=0,
             model=model,
+            parameters=parameters,
             key=mock_api_key,
         )
         assert request.model == model.value
@@ -295,7 +296,6 @@ class TestModelSpecificParameters:
             lon=0,
             model=ModelTypes.GFS_WAVE,
             parameters=[
-                ValidParameters.TEMP,
                 ValidParameters.WAVES,
                 ValidParameters.WIND_WAVES,
                 ValidParameters.SWELL1,
@@ -346,7 +346,6 @@ class TestModelSpecificParameters:
             lon=0,
             model=ModelTypes.CAMS,
             parameters=[
-                ValidParameters.TEMP,
                 ValidParameters.SO2SM,
                 ValidParameters.DUSTSM,
                 ValidParameters.COSC,
@@ -372,11 +371,22 @@ class TestModelSpecificParameters:
             assert "so2sm" not in request.parameters
 
     def test_common_parameters_valid_for_all_models(self, mock_api_key):
-        """Test that truly common parameters work for all models."""
-        # These parameters are available across ALL models including AROME
+        """Test that truly common parameters work for standard weather models."""
+        # These parameters are available across standard weather models
+        # (excluding specialized models like GFS_WAVE and CAMS)
         common_params = [ValidParameters.TEMP, ValidParameters.WIND, ValidParameters.RH]
 
-        for model in ModelTypes:
+        # Standard weather models that support common meteorological parameters
+        standard_models = [
+            ModelTypes.AROME,
+            ModelTypes.ICONEU,
+            ModelTypes.GFS,
+            ModelTypes.NAMCONUS,
+            ModelTypes.NAMHAWAII,
+            ModelTypes.NAMALASKA,
+        ]
+
+        for model in standard_models:
             request = WindyPointRequest(
                 lat=0,
                 lon=0,
