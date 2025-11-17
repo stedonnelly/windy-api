@@ -6,6 +6,19 @@
 
 Python Windy API package for interacting with the Windy API. Currently only supports access to the point forecast API.
 
+## Features
+
+- **Point Forecast API**: Get detailed weather forecasts for any geographic location using latitude/longitude coordinates
+- **Multiple Weather Models**: Support for 7+ weather forecast models including GFS, ICON EU, GFS Wave, NAM regional models, and CAMS air quality
+- **Comprehensive Parameters**: Access 20+ weather parameters including temperature, wind, precipitation, humidity, clouds, pressure, CAPE, and more
+- **Automatic Validation**: Built-in parameter validation ensures only compatible parameters are requested for each model
+- **Async Support**: Full async/await support for concurrent API requests with `get_point_forecast_async()`
+- **Type Safety**: Strongly typed with Pydantic models for reliable data validation and IDE autocomplete
+- **Easy Data Access**: Intuitive response objects with helper methods like `get_data()` and `get_unit()` for accessing forecast data
+- **Error Handling**: Clear error messages and exceptions for robust application development
+
+
+
 ## Installation
 
 ```bash
@@ -72,6 +85,10 @@ Common weather parameters you can request:
 - `lclouds`, `mclouds`, `hclouds` - Low/medium/high clouds
 - `gh` - Geopotential height
 - `ptype` - Precipitation type
+
+### Model Parameter Checking
+
+Upon submitting a request to the Windy API the request is validated. If a parameter is requested for a model that does not support it, the incompatible parameters will automatically be removed from the request on validation.
 
 ### Detailed Examples
 
@@ -176,7 +193,6 @@ except ValueError as e:
 ### Getting Your API Key
 
 To use this library, you need a Windy API key. Visit [Windy API](https://api.windy.com/) to register and obtain your API key.
-
 
 ## Contributing
 
