@@ -66,6 +66,21 @@ class WindyAPI:
         response.raise_for_status()
         return WindyForecastResponse(**response.json())
 
+    def get_model_types(self) -> list[str]:
+        """Get available weather model types."""
+        return [model.value for model in ModelTypes]
+
+    def get_parameters_for_model(self, model: ModelTypes) -> list[str]:
+        """Get available parameters for a specific weather model."""
+        from windy_api.models.point_request import MODEL_PARAMETER_MAP
+
+        available_params = MODEL_PARAMETER_MAP[model]
+        return [param.value for param in available_params]
+
+    def get_levels(self) -> list[str]:
+        """Get available atmospheric levels."""
+        return [level.value for level in Levels]
+
     async def get_point_forecast_async(
         self,
         latitude: float,
