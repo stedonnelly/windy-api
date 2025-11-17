@@ -1,23 +1,25 @@
 from enum import Enum
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
 class ModelTypes(str, Enum):
     """Available weather forecast models"""
 
-    ICONEU = "iconeu"
+    AROME = "arome"
+    ICONEU = "iconEu"
     GFS = "gfs"
-    GFS_WAVE = "gfs_wave"
-    NAMCONUS = "namconus"
-    NAMHAWAII = "namhawaii"
-    NAMALASKA = "namalaska"
+    GFS_WAVE = "gfsWave"
+    NAMCONUS = "namConus"
+    NAMHAWAII = "namHawaii"
+    NAMALASKA = "namAlaska"
     CAMS = "cams"
 
 
 class ValidParameters(str, Enum):
     """Available forecast parameters"""
 
+    # Common parameters (available across all models)
     TEMP = "temp"
     DEWPOINT = "dewpoint"
     PRECIP = "precip"
@@ -34,6 +36,18 @@ class ValidParameters(str, Enum):
     GH = "gh"
     PRESSURE = "pressure"
 
+    # Wave-specific parameters (GFS Wave only)
+    WAVES = "waves"
+    WIND_WAVES = "windWaves"
+    SWELL1 = "swell1"
+    SWELL2 = "swell2"
+    SWELL3 = "swell3"
+
+    # Additional atmospheric parameters (CAMS and other models)
+    SO2SM = "so2sm"  # Sulfur dioxide
+    DUSTSM = "dustsm"
+    COSC = "cosc"  # Carbon monoxide
+
 
 class Levels(str, Enum):
     SURFACE = "surface"
@@ -46,9 +60,58 @@ class Levels(str, Enum):
     H700 = "700h"
     H600 = "600h"
     H500 = "500h"
+    H400 = "400h"
     H300 = "300h"
     H200 = "200h"
     H150 = "150h"
+
+
+# Common parameters available across all models
+COMMON_PARAMETERS = {
+    ValidParameters.TEMP,
+    ValidParameters.DEWPOINT,
+    ValidParameters.PRECIP,
+    ValidParameters.CONV_PRECIP,
+    ValidParameters.SNOW_PRECIP,
+    ValidParameters.WIND,
+    ValidParameters.WIND_GUST,
+    ValidParameters.CAPE,
+    ValidParameters.PTYPE,
+    ValidParameters.LCLOUDS,
+    ValidParameters.MCLOUDS,
+    ValidParameters.HCLOUDS,
+    ValidParameters.RH,
+    ValidParameters.GH,
+    ValidParameters.PRESSURE,
+}
+
+# Wave parameters only available for GFS Wave model
+WAVE_PARAMETERS = {
+    ValidParameters.WAVES,
+    ValidParameters.WIND_WAVES,
+    ValidParameters.SWELL1,
+    ValidParameters.SWELL2,
+    ValidParameters.SWELL3,
+}
+
+# Atmospheric composition parameters
+ATMOSPHERIC_PARAMETERS = {
+    ValidParameters.SO2SM,
+    ValidParameters.DUSTSM,
+    ValidParameters.COSC,
+}
+
+# Model-specific parameter availability mapping
+MODEL_PARAMETER_MAP: dict[ModelTypes, set[ValidParameters]] = {
+    ModelTypes.AROME: COMMON_PARAMETERS,
+    ModelTypes.ICONEU: COMMON_PARAMETERS,
+    ModelTypes.GFS: COMMON_PARAMETERS,
+    ModelTypes.GFS_WAVE: COMMON_PARAMETERS | WAVE_PARAMETERS,
+    ModelTypes.NAMCONUS: COMMON_PARAMETERS,
+    ModelTypes.NAMHAWAII: COMMON_PARAMETERS,
+    ModelTypes.NAMALASKA: COMMON_PARAMETERS,
+    ModelTypes.CAMS: COMMON_PARAMETERS | ATMOSPHERIC_PARAMETERS,
+}
 
 
 class WindyPointRequest(BaseModel):
@@ -58,7 +121,7 @@ class WindyPointRequest(BaseModel):
 
     lat: float = Field(ge=-90, le=90, description="Latitude coordinate")
     lon: float = Field(ge=-180, le=180, description="Longitude coordinate")
-    model: str | ModelTypes = Field(default=ModelTypes.GFS, description="Forecast model to use")
+    model: ModelTypes = Field(default=ModelTypes.GFS, description="Forecast model to use")
     parameters: list[ValidParameters] = Field(
         default_factory=lambda: [ValidParameters.TEMP, ValidParameters.WIND],
         description="Parameters to retrieve from the forecast",
@@ -69,54 +132,38 @@ class WindyPointRequest(BaseModel):
     )
     key: str = Field(description="Your Windy API key")
 
-    @field_validator("model", mode="before")
-    @classmethod
-    def normalize_model(cls, v):
-        """Accept case-insensitive model names and common variations"""
-        if isinstance(v, ModelTypes):
-            return v
+    @model_validator(mode="after")
+    def validate_parameters_for_model(self):
+        """Validate that requested parameters are available for the selected model"""
+        # With use_enum_values=True, model is stored as string, convert back to enum
+        model = ModelTypes(self.model) if isinstance(self.model, str) else self.model
 
-        # Create mapping of common variations to enum values
-        model_map = {
-            "iconeu": ModelTypes.ICONEU,
-            "icon_eu": ModelTypes.ICONEU,
-            "icon eu": ModelTypes.ICONEU,
-            "gfs": ModelTypes.GFS,
-            "gfs_wave": ModelTypes.GFS_WAVE,
-            "gfswave": ModelTypes.GFS_WAVE,
-            "gfs wave": ModelTypes.GFS_WAVE,
-            "namconus": ModelTypes.NAMCONUS,
-            "nam_conus": ModelTypes.NAMCONUS,
-            "nam conus": ModelTypes.NAMCONUS,
-            "namhawaii": ModelTypes.NAMHAWAII,
-            "nam_hawaii": ModelTypes.NAMHAWAII,
-            "nam hawaii": ModelTypes.NAMHAWAII,
-            "namalaska": ModelTypes.NAMALASKA,
-            "nam_alaska": ModelTypes.NAMALASKA,
-            "nam alaska": ModelTypes.NAMALASKA,
-            "cams": ModelTypes.CAMS,
-        }
+        # Get available parameters for this model
+        available_params = MODEL_PARAMETER_MAP.get(model, COMMON_PARAMETERS)
 
-        normalized = model_map.get(str(v).lower().replace("-", " "))
-        if not normalized:
-            valid_models = ", ".join(f"'{e.value}'" for e in ModelTypes)
-            err_str = f"Unknown model: '{v}'. Valid options: {valid_models}"
-            raise ValueError(err_str)
-        return normalized
+        # With use_enum_values=True, parameters are stored as strings, convert back to enums
+        requested_params = []
+        for param in self.parameters:
+            # At this point, all parameters are strings due to use_enum_values=True
+            try:
+                requested_params.append(ValidParameters(param))
+            except ValueError as e:
+                # If conversion fails, the parameter is invalid
+                err_msg = (
+                    f"Parameter '{param}' is not a valid ValidParameters enum value. "
+                    f"Available parameters: {[p.value for p in available_params]}"
+                )
+                raise ValueError(err_msg) from e
 
-    @field_validator("parameters", mode="before")
-    @classmethod
-    def normalize_parameters(cls, v):
-        """Accept parameter strings and normalize them"""
-        if not v:
-            return ["temp", "wind"]
+        # Check if any requested parameter is not available for this model
+        invalid_params = [p for p in requested_params if p not in available_params]
 
-        normalized = []
-        for param in v:
-            # If it's already a ValidParameters enum, extract the value
-            if isinstance(param, ValidParameters):
-                normalized.append(param.value)
-            else:
-                # Accept the string as-is and let Pydantic validate against enum
-                normalized.append(str(param))
-        return normalized
+        if invalid_params:
+            invalid_names = [p.value for p in invalid_params]
+            available_names = sorted([p.value for p in available_params])
+            err_msg = (
+                f"Parameters {invalid_names} are not available for model '{model.value}'. "
+                f"Available parameters: {available_names}"
+            )
+            raise ValueError(err_msg)
+        return self

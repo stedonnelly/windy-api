@@ -45,7 +45,7 @@ Homepage = "https://github.com/stedonnelly/windy-api"
 Discussions = "https://github.com/stedonnelly/windy-api/discussions"
 Changelog = "https://github.com/stedonnelly/windy-api/releases"
 
-[tool.pytest]
+[tool.pytest.ini_options]
 minversion = "6.0"
 addopts = ["-ra", "--showlocals", "--strict-markers", "--strict-config"]
 xfail_strict = true
@@ -56,6 +56,12 @@ log_cli_level = "INFO"
 testpaths = [
   "tests",
 ]
+markers = [
+  "asyncio: mark test as an async test using pytest-asyncio",
+]
+
+[tool.pytest_asyncio]
+mode = "auto"
 
 [tool.coverage]
 run.source = ["windy_api"]
