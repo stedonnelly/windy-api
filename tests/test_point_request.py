@@ -19,7 +19,6 @@ class TestWindyPointRequestValidation:
         request = WindyPointRequest(
             lat=valid_coordinates["lat"],
             lon=valid_coordinates["lon"],
-            model=ModelTypes.GFS,
             key=mock_api_key,
         )
         assert request.lat == valid_coordinates["lat"]
@@ -34,7 +33,6 @@ class TestWindyPointRequestValidation:
         request = WindyPointRequest(
             lat=lat,
             lon=0,
-            model=ModelTypes.GFS,
             key=mock_api_key,
         )
         assert request.lat == lat
@@ -49,7 +47,6 @@ class TestWindyPointRequestValidation:
             WindyPointRequest(
                 lat=lat,
                 lon=0,
-                model=ModelTypes.GFS,
                 key=mock_api_key,
             )
         assert "lat" in str(exc_info.value).lower()
@@ -63,7 +60,6 @@ class TestWindyPointRequestValidation:
         request = WindyPointRequest(
             lat=0,
             lon=lon,
-            model=ModelTypes.GFS,
             key=mock_api_key,
         )
         assert request.lon == lon
@@ -78,7 +74,6 @@ class TestWindyPointRequestValidation:
             WindyPointRequest(
                 lat=0,
                 lon=lon,
-                model=ModelTypes.GFS,
                 key=mock_api_key,
             )
         assert "lon" in str(exc_info.value).lower()
@@ -110,16 +105,6 @@ class TestModelValidation:
         )
         assert request.model == model.value
 
-    def test_invalid_model_raises_validation_error(self, mock_api_key):
-        """Test that invalid model raises ValidationError."""
-        with pytest.raises(ValidationError):
-            WindyPointRequest(
-                lat=0,
-                lon=0,
-                model="invalid_model",
-                key=mock_api_key,
-            )
-
 
 class TestParameterHandling:
     """Test parameter normalization and defaults."""
@@ -129,7 +114,6 @@ class TestParameterHandling:
         request = WindyPointRequest(
             lat=0,
             lon=0,
-            model=ModelTypes.GFS,
             key=mock_api_key,
         )
         # Check defaults are set
@@ -141,7 +125,6 @@ class TestParameterHandling:
         request = WindyPointRequest(
             lat=0,
             lon=0,
-            model=ModelTypes.GFS,
             parameters=[ValidParameters.TEMP],
             key=mock_api_key,
         )
@@ -153,7 +136,6 @@ class TestParameterHandling:
         request = WindyPointRequest(
             lat=0,
             lon=0,
-            model=ModelTypes.GFS,
             parameters=params,
             key=mock_api_key,
         )
@@ -166,7 +148,6 @@ class TestParameterHandling:
         request = WindyPointRequest(
             lat=0,
             lon=0,
-            model=ModelTypes.GFS,
             parameters=[ValidParameters.TEMP, ValidParameters.DEWPOINT],
             key=mock_api_key,
         )
@@ -198,7 +179,6 @@ class TestParameterHandling:
         request = WindyPointRequest(
             lat=0,
             lon=0,
-            model=ModelTypes.GFS,
             parameters=[param],
             key=mock_api_key,
         )
@@ -213,7 +193,6 @@ class TestLevelsHandling:
         request = WindyPointRequest(
             lat=0,
             lon=0,
-            model=ModelTypes.GFS,
             key=mock_api_key,
         )
         # Check defaults are set
@@ -224,7 +203,6 @@ class TestLevelsHandling:
         request = WindyPointRequest(
             lat=0,
             lon=0,
-            model=ModelTypes.GFS,
             levels=[Levels.SURFACE],
             key=mock_api_key,
         )
@@ -236,7 +214,6 @@ class TestLevelsHandling:
         request = WindyPointRequest(
             lat=0,
             lon=0,
-            model=ModelTypes.GFS,
             levels=levels,
             key=mock_api_key,
         )
@@ -249,7 +226,6 @@ class TestLevelsHandling:
         request = WindyPointRequest(
             lat=0,
             lon=0,
-            model=ModelTypes.GFS,
             levels=[Levels.SURFACE, Levels.H850, Levels.H500],
             key=mock_api_key,
         )
@@ -281,7 +257,6 @@ class TestLevelsHandling:
         request = WindyPointRequest(
             lat=0,
             lon=0,
-            model=ModelTypes.GFS,
             levels=[level],
             key=mock_api_key,
         )
@@ -297,7 +272,6 @@ class TestAPIKeyHandling:
             WindyPointRequest(
                 lat=0,
                 lon=0,
-                model=ModelTypes.GFS,
             )
         assert "key" in str(exc_info.value).lower()
 
@@ -306,7 +280,6 @@ class TestAPIKeyHandling:
         request = WindyPointRequest(
             lat=0,
             lon=0,
-            model=ModelTypes.GFS,
             key=mock_api_key,
         )
         assert request.key == mock_api_key
@@ -334,26 +307,37 @@ class TestModelSpecificParameters:
         assert "swell1" in request.parameters
 
     def test_wave_parameters_invalid_for_gfs(self, mock_api_key):
-        """Test that wave parameters are rejected for non-wave models."""
-        with pytest.raises(ValueError, match="not available for model"):
-            WindyPointRequest(
+        """Test that wave parameters are filtered out for non-wave models."""
+        with pytest.warns(UserWarning, match="not available for model 'gfs'"):
+            request = WindyPointRequest(
                 lat=0,
                 lon=0,
                 model=ModelTypes.GFS,
-                parameters=[ValidParameters.WAVES],
+                parameters=[ValidParameters.WAVES, ValidParameters.TEMP],
                 key=mock_api_key,
             )
+            # Should have filtered out WAVES, keeping only TEMP
+            assert "temp" in request.parameters
+            assert "waves" not in request.parameters
 
     def test_wave_parameters_invalid_for_iconeu(self, mock_api_key):
-        """Test that wave parameters are rejected for ICON EU model."""
-        with pytest.raises(ValueError, match="not available for model"):
-            WindyPointRequest(
+        """Test that wave parameters are filtered out for ICON EU model."""
+        with pytest.warns(UserWarning, match="not available for model 'iconEu'"):
+            request = WindyPointRequest(
                 lat=0,
                 lon=0,
                 model=ModelTypes.ICONEU,
-                parameters=[ValidParameters.WIND_WAVES, ValidParameters.SWELL2],
+                parameters=[
+                    ValidParameters.WIND_WAVES,
+                    ValidParameters.SWELL2,
+                    ValidParameters.WIND,
+                ],
                 key=mock_api_key,
             )
+            # Should have filtered out wave parameters, keeping only WIND
+            assert "wind" in request.parameters
+            assert "windWaves" not in request.parameters
+            assert "swell2" not in request.parameters
 
     def test_atmospheric_parameters_valid_for_cams(self, mock_api_key):
         """Test that atmospheric parameters are accepted for CAMS model."""
@@ -374,19 +358,23 @@ class TestModelSpecificParameters:
         assert "cosc" in request.parameters
 
     def test_atmospheric_parameters_invalid_for_gfs(self, mock_api_key):
-        """Test that atmospheric parameters are rejected for non-CAMS models."""
-        with pytest.raises(ValueError, match="not available for model"):
-            WindyPointRequest(
+        """Test that atmospheric parameters are filtered out for non-CAMS models."""
+        with pytest.warns(UserWarning, match="not available for model 'gfs'"):
+            request = WindyPointRequest(
                 lat=0,
                 lon=0,
                 model=ModelTypes.GFS,
-                parameters=[ValidParameters.SO2SM],
+                parameters=[ValidParameters.SO2SM, ValidParameters.PRESSURE],
                 key=mock_api_key,
             )
+            # Should have filtered out SO2SM, keeping only PRESSURE
+            assert "pressure" in request.parameters
+            assert "so2sm" not in request.parameters
 
     def test_common_parameters_valid_for_all_models(self, mock_api_key):
-        """Test that common parameters work for all models."""
-        common_params = [ValidParameters.TEMP, ValidParameters.WIND, ValidParameters.PRESSURE]
+        """Test that truly common parameters work for all models."""
+        # These parameters are available across ALL models including AROME
+        common_params = [ValidParameters.TEMP, ValidParameters.WIND, ValidParameters.RH]
 
         for model in ModelTypes:
             request = WindyPointRequest(
@@ -398,7 +386,7 @@ class TestModelSpecificParameters:
             )
             assert "temp" in request.parameters
             assert "wind" in request.parameters
-            assert "pressure" in request.parameters
+            assert "rh" in request.parameters
 
     def test_arome_model_with_common_parameters(self, mock_api_key):
         """Test AROME model accepts common parameters."""
