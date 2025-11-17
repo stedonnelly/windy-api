@@ -1,3 +1,4 @@
+import warnings
 from enum import Enum
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
@@ -24,7 +25,6 @@ class ValidParameters(str, Enum):
     DEWPOINT = "dewpoint"
     PRECIP = "precip"
     CONV_PRECIP = "convPrecip"
-    SNOW_PRECIP = "snowPrecip"
     WIND = "wind"
     WIND_GUST = "windGust"
     CAPE = "cape"
@@ -33,6 +33,9 @@ class ValidParameters(str, Enum):
     MCLOUDS = "mclouds"
     HCLOUDS = "hclouds"
     RH = "rh"
+
+    # Valid for all except AROME, gfsWave, cams
+    SNOW_PRECIP = "snowPrecip"
     GH = "gh"
     PRESSURE = "pressure"
 
@@ -43,7 +46,7 @@ class ValidParameters(str, Enum):
     SWELL2 = "swell2"
     SWELL3 = "swell3"
 
-    # Additional atmospheric parameters (CAMS and other models)
+    # Additional atmospheric parameters (CAMS only)
     SO2SM = "so2sm"  # Sulfur dioxide
     DUSTSM = "dustsm"
     COSC = "cosc"  # Carbon monoxide
@@ -94,6 +97,21 @@ WAVE_PARAMETERS = {
     ValidParameters.SWELL3,
 }
 
+AROME_PARAMETERS = {
+    ValidParameters.TEMP,
+    ValidParameters.DEWPOINT,
+    ValidParameters.PRECIP,
+    ValidParameters.CONV_PRECIP,
+    ValidParameters.WIND,
+    ValidParameters.WIND_GUST,
+    ValidParameters.CAPE,
+    ValidParameters.PTYPE,
+    ValidParameters.LCLOUDS,
+    ValidParameters.MCLOUDS,
+    ValidParameters.HCLOUDS,
+    ValidParameters.RH,
+}
+
 # Atmospheric composition parameters
 ATMOSPHERIC_PARAMETERS = {
     ValidParameters.SO2SM,
@@ -103,7 +121,7 @@ ATMOSPHERIC_PARAMETERS = {
 
 # Model-specific parameter availability mapping
 MODEL_PARAMETER_MAP: dict[ModelTypes, set[ValidParameters]] = {
-    ModelTypes.AROME: COMMON_PARAMETERS,
+    ModelTypes.AROME: AROME_PARAMETERS,
     ModelTypes.ICONEU: COMMON_PARAMETERS,
     ModelTypes.GFS: COMMON_PARAMETERS,
     ModelTypes.GFS_WAVE: COMMON_PARAMETERS | WAVE_PARAMETERS,
@@ -115,55 +133,60 @@ MODEL_PARAMETER_MAP: dict[ModelTypes, set[ValidParameters]] = {
 
 
 class WindyPointRequest(BaseModel):
-    """Request model for Windy Point Forecast API"""
+    """Request model for Windy Point Forecast API.
+
+    Supports multiple weather models with model-specific parameter availability:
+    - GFS, ICONEU, NAM*: Common parameters only
+    - AROME: Arome-specific parameters
+    - GFS_WAVE: Common + wave parameters (waves, windWaves, swell1-3)
+    - CAMS: Common + atmospheric parameters (so2sm, dustsm, cosc)
+    """
 
     model_config = ConfigDict(use_enum_values=True)
 
     lat: float = Field(ge=-90, le=90, description="Latitude coordinate")
     lon: float = Field(ge=-180, le=180, description="Longitude coordinate")
-    model: ModelTypes = Field(default=ModelTypes.GFS, description="Forecast model to use")
+    model: ModelTypes = Field(
+        default=ModelTypes.GFS,
+        description=(
+            "Weather forecast model. "
+            "Available: gfs (global), gfsWave (waves), cams (atmospheric), "
+            "arome (France), iconEu (Europe), namConus/namHawaii/namAlaska"
+        ),
+    )
     parameters: list[ValidParameters] = Field(
         default_factory=lambda: [ValidParameters.TEMP, ValidParameters.WIND],
-        description="Parameters to retrieve from the forecast",
+        description=(
+            "Weather parameters to retrieve. "
+            "Common (all models except AROME, gfsWave, cams): temp, dewpoint, precip, convPrecip, "
+            "snowPrecip, wind, windGust, cape, ptype, lclouds, mclouds, hclouds, rh, gh, pressure. "
+            "Arome-specific: temp, dewpoint, precip, convPrecip, wind, windGust, cape, ptype, "
+            "lclouds, mclouds, hclouds, rh."
+            "Wave (gfsWave only): waves, windWaves, swell1, swell2, swell3. "
+            "Atmospheric (cams only): so2sm, dustsm, cosc"
+        ),
     )
     levels: list[Levels] = Field(
         default_factory=lambda: [Levels.SURFACE],
-        description="Atmospheric levels (e.g., 'surface', '850h')",
+        description="Atmospheric levels (e.g., 'surface', '850h', '500h')",
     )
     key: str = Field(description="Your Windy API key")
 
     @model_validator(mode="after")
-    def validate_parameters_for_model(self):
-        """Validate that requested parameters are available for the selected model"""
-        # With use_enum_values=True, model is stored as string, convert back to enum
-        model = ModelTypes(self.model) if isinstance(self.model, str) else self.model
-
-        # Get available parameters for this model
-        available_params = MODEL_PARAMETER_MAP.get(model, COMMON_PARAMETERS)
-
-        # With use_enum_values=True, parameters are stored as strings, convert back to enums
-        requested_params = []
-        for param in self.parameters:
-            # At this point, all parameters are strings due to use_enum_values=True
-            try:
-                requested_params.append(ValidParameters(param))
-            except ValueError as e:
-                # If conversion fails, the parameter is invalid
-                err_msg = (
-                    f"Parameter '{param}' is not a valid ValidParameters enum value. "
-                    f"Available parameters: {[p.value for p in available_params]}"
-                )
-                raise ValueError(err_msg) from e
-
-        # Check if any requested parameter is not available for this model
-        invalid_params = [p for p in requested_params if p not in available_params]
+    def validate_parameters_for_model(self) -> "WindyPointRequest":
+        """Validate and filter parameters to only those available for the selected model."""
+        available_params = MODEL_PARAMETER_MAP[ModelTypes(self.model)]
+        invalid_params = [p for p in self.parameters if ValidParameters(p) not in available_params]
 
         if invalid_params:
-            invalid_names = [p.value for p in invalid_params]
-            available_names = sorted([p.value for p in available_params])
-            err_msg = (
-                f"Parameters {invalid_names} are not available for model '{model.value}'. "
-                f"Available parameters: {available_names}"
+            # Issue warning about invalid parameters
+            warnings.warn(
+                f"Parameters {invalid_params} are not available for model '{self.model}' "
+                f"and will be removed. Available parameters: {sorted([p.value for p in available_params])}",  # noqa: E501
+                UserWarning,
+                stacklevel=2,
             )
-            raise ValueError(err_msg)
+            # Filter to only valid parameters
+            self.parameters = [p for p in self.parameters if ValidParameters(p) in available_params]
+
         return self
