@@ -44,7 +44,6 @@ class ValidParameters(str, Enum):
     WIND_WAVES = "windWaves"
     SWELL1 = "swell1"
     SWELL2 = "swell2"
-    SWELL3 = "swell3"
 
     # Additional atmospheric parameters (CAMS only)
     SO2SM = "so2sm"  # Sulfur dioxide
@@ -94,7 +93,6 @@ WAVE_PARAMETERS = {
     ValidParameters.WIND_WAVES,
     ValidParameters.SWELL1,
     ValidParameters.SWELL2,
-    ValidParameters.SWELL3,
 }
 
 AROME_PARAMETERS = {
