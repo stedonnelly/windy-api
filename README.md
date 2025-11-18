@@ -3,6 +3,7 @@
 [![Actions Status][actions-badge]][actions-link]
 [![PyPI version][pypi-version]][pypi-link]
 [![PyPI platforms][pypi-platforms]][pypi-link]
+[![PyPi downloads][pypi-downloads]][pypi-link]
 
 Python Windy API package for interacting with the Windy API. Currently only supports access to the point forecast API.
 
@@ -279,4 +280,5 @@ Distributed under the terms of the [MIT license](LICENSE).
 [pypi-link]:                https://pypi.org/project/windy-api/
 [pypi-platforms]:           https://img.shields.io/pypi/pyversions/windy-api
 [pypi-version]:             https://img.shields.io/pypi/v/windy-api
+[pypi-downloads]:           https://img.shields.io/pypi/dm/windy-api
 <!-- prettier-ignore-end -->
