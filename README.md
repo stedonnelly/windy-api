@@ -194,6 +194,76 @@ except ValueError as e:
 
 To use this library, you need a Windy API key. Visit [Windy API](https://api.windy.com/) to register and obtain your API key.
 
+## Compliance & Terms of Use
+
+**Important:** This library is not affiliated with or endorsed by Windy.com. It is an unofficial Python wrapper for the Windy Map & Point Forecast API.
+
+By using this library, you agree to comply with all of [Windy's official Terms of Use](https://account.windy.com/agreements/windy-api-map-and-point-forecast-terms-of-use) for their Map & Point Forecast API. This wrapper does not modify or relax any of Windy's terms — it simply provides Python bindings for easier integration.
+
+### Key Requirements You Must Follow
+
+#### 1. API Key Security
+
+- **You must keep your API key confidential** — Never commit it to GitHub, share it publicly, or embed it in client-side applications
+- **Private Application keys** must be held exclusively and cannot be shared with third parties
+- **Use environment variables** to store your key securely (see example above)
+
+From Windy's Terms: *"API Keys for the Private Application are considered confidential and must be held exclusively. Allowing use of an API Key to a Private Application by any third party is forbidden. Usage of an API Key to a Private Application by any third party shall be considered a material breach of the Agreement."*
+
+#### 2. No Data Storage or Extraction
+
+Windy explicitly prohibits storing, extracting, or creating derivative weather databases:
+
+- ❌ No long-term storage of weather data
+- ❌ No creating weather databases or derived datasets
+- ❌ No bulk downloading or archiving forecast data
+- ❌ No reconstructing original meteorological model data
+
+From Windy's Terms: *"Users cannot store, extract, modify, distribute, use the weather data or other content of the Services, create any weather works or databases derived therefrom"*
+
+#### 3. Attribution Requirements
+
+If you build an application that displays weather data to end users, you must include:
+
+- The **Windy logo** (unscaled, 100% opacity, clickable with hyperlink to https://www.windy.com)
+- **Text attribution**: "Contains data from the Windy database"
+- Additional data source credits in Help or About sections
+
+**Example Attribution (HTML):**
+```html
+<a href="https://www.windy.com" target="_blank">
+  <img src="https://www.windy.com/img/logo300.png" alt="Windy Logo" />
+</a>
+<p>Contains data from the Windy database</p>
+```
+
+#### 4. No Replicating Windy Services
+
+You cannot create applications that:
+
+- ❌ Replicate Windy's services or aim to compete directly with Windy
+- ❌ Provide Windy API data as a service to third parties
+- ❌ Act as an API proxy or forwarding service
+
+From Windy's Terms: *"The User is not allowed to create User Applications that would aim to replicate the Services or other services of the Provider."*
+
+#### 5. Usage Limits
+
+- **Trial Version**: 500 sessions/day maximum (development purposes only, not for production)
+- **Professional Version**: 10,000 sessions/day (expandable upon request, requires paid plan)
+
+### License Notice
+
+The code in this repository is licensed under the [MIT License](LICENSE), but **the Windy API data is not**. All weather data remains the property of Windy.com and is governed by their [Terms of Use](https://account.windy.com/agreements/windy-api-map-and-point-forecast-terms-of-use).
+
+### Best Practices for Compliance
+
+1. **Use environment variables** for API keys (never hardcode them)
+2. **Cache responsibly** — keep cached data in-memory or with very short TTL
+3. **Add attribution** if you display data to users
+4. **Respect rate limits** — implement backoff strategies for failed requests
+5. **Review Windy's terms** before deploying to production
+
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for instructions on how to contribute.
