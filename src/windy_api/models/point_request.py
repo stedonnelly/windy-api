@@ -117,6 +117,7 @@ ATMOSPHERIC_PARAMETERS = {
     ValidParameters.COSC,
 }
 
+
 # Model-specific parameter availability mapping
 MODEL_PARAMETER_MAP: dict[ModelTypes, set[ValidParameters]] = {
     ModelTypes.AROME: AROME_PARAMETERS,
@@ -127,6 +128,17 @@ MODEL_PARAMETER_MAP: dict[ModelTypes, set[ValidParameters]] = {
     ModelTypes.NAMHAWAII: COMMON_PARAMETERS,
     ModelTypes.NAMALASKA: COMMON_PARAMETERS,
     ModelTypes.CAMS: ATMOSPHERIC_PARAMETERS,
+}
+
+MODEL_LEVELS_MAP: dict[ModelTypes, set[Levels]] = {
+    ModelTypes.AROME: set(Levels),
+    ModelTypes.ICONEU: set(Levels),
+    ModelTypes.GFS: set(Levels),
+    ModelTypes.GFS_WAVE: {Levels.SURFACE},
+    ModelTypes.NAMCONUS: set(Levels),
+    ModelTypes.NAMHAWAII: set(Levels),
+    ModelTypes.NAMALASKA: set(Levels),
+    ModelTypes.CAMS: {Levels.SURFACE},
 }
 
 
@@ -186,5 +198,28 @@ class WindyPointRequest(BaseModel):
             )
             # Filter to only valid parameters
             self.parameters = [p for p in self.parameters if ValidParameters(p) in available_params]
+
+        return self
+
+    @model_validator(mode="after")
+    def validate_levels_for_model(self) -> "WindyPointRequest":
+        """Validate levels for the selected model."""
+        available_levels = MODEL_LEVELS_MAP[ModelTypes(self.model)]
+        invalid_levels = [level for level in self.levels if Levels(level) not in available_levels]
+        if invalid_levels:
+            warnings.warn(
+                f"Levels {invalid_levels} are not available for model '{self.model}' "
+                f"and will be removed. Available levels: {sorted([level.value for level in available_levels])}",  # noqa: E501
+                UserWarning,
+                stacklevel=2,
+            )
+            self.levels = [level for level in self.levels if Levels(level) in available_levels]
+        if not self.levels:
+            # Ensure at least one level remains
+            err_msg = (
+                f"After validation, no valid levels remain for model '{self.model}'. "
+                f"Available levels: {sorted([level.value for level in available_levels])}"
+            )
+            raise ValueError(err_msg)
 
         return self
