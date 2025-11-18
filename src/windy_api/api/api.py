@@ -81,6 +81,35 @@ class WindyAPI:
         """Get available atmospheric levels."""
         return [level.value for level in Levels]
 
+    def get_point_forecast_all_parameters(
+        self,
+        latitude: float,
+        longitude: float,
+        model: ModelTypes,
+        levels: list[Levels] | None = None,
+    ) -> WindyForecastResponse:
+        """Fetch point weather forecast data for all available parameters of a model.
+
+        Args:
+            latitude: Latitude coordinate between -90 and 90.
+            longitude: Longitude coordinate between -180 and 180.
+            model: Weather forecast model to use.
+            levels: Atmospheric levels (e.g., surface, 850h).
+                Defaults to [Levels.SURFACE].
+        Returns:
+            WindyForecastResponse: Weather forecast response data.
+        """
+        from windy_api.models.point_request import MODEL_PARAMETER_MAP
+
+        available_params = MODEL_PARAMETER_MAP[model]
+        return self.get_point_forecast(
+            latitude=latitude,
+            longitude=longitude,
+            model=model,
+            parameters=list(available_params),
+            levels=levels,
+        )
+
     async def get_point_forecast_async(
         self,
         latitude: float,
