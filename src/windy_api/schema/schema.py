@@ -282,7 +282,7 @@ class WindyForecastResponse(BaseModel):
 
         elif name == "snowPrecip":
             extra = getattr(self, "__pydantic_extra__", {}) or {}
-            has_snow_precip = any(key.startswith("past3hsnowprecip-") for key in extra)
+            has_snow_precip = any(key.startswith("past3hsnow-") for key in extra)
 
             if has_snow_precip:
                 if name not in self._accessor_cache:
@@ -291,7 +291,7 @@ class WindyForecastResponse(BaseModel):
 
         elif name == "windGust":
             extra = getattr(self, "__pydantic_extra__", {}) or {}
-            has_wind_gust = any(key.startswith("windGust-") for key in extra)
+            has_wind_gust = any(key.startswith("gust-") for key in extra)
 
             if has_wind_gust:
                 if name not in self._accessor_cache:
