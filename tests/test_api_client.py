@@ -22,19 +22,14 @@ class TestWindyAPIInitialization:
     def test_default_url_is_set(self, mock_api_key):
         """Test that default URL is set when not provided."""
         client = WindyAPI(api_key=mock_api_key)
-        assert (
-            "api.windy.com" in client.point_forecast_url
-            or "windy" in client.point_forecast_url.lower()
-        )
+        assert "api.windy.com" in client.point_forecast_url or "windy" in client.point_forecast_url.lower()
 
 
 class TestSyncGetPointForecast:
     """Test synchronous get_point_forecast method."""
 
     @patch("httpx.post")
-    def test_successful_request(
-        self, mock_post, mock_api_key, valid_coordinates, mock_api_response_data
-    ):
+    def test_successful_request(self, mock_post, mock_api_key, valid_coordinates, mock_api_response_data):
         """Test successful API request."""
         # Setup mock response
         mock_response = Mock()
@@ -63,9 +58,7 @@ class TestSyncGetPointForecast:
         assert mock_api_key in str(call_args)
 
     @patch("httpx.post")
-    def test_request_with_all_parameters(
-        self, mock_post, mock_api_key, valid_coordinates, mock_api_response_data
-    ):
+    def test_request_with_all_parameters(self, mock_post, mock_api_key, valid_coordinates, mock_api_response_data):
         """Test request with all possible parameters."""
         mock_response = Mock()
         mock_response.status_code = 200
@@ -176,9 +169,7 @@ class TestAsyncGetPointForecast:
 
     @pytest.mark.asyncio()
     @patch("httpx.AsyncClient.post", new_callable=AsyncMock)
-    async def test_async_successful_request(
-        self, mock_post, mock_api_key, valid_coordinates, mock_api_response_data
-    ):
+    async def test_async_successful_request(self, mock_post, mock_api_key, valid_coordinates, mock_api_response_data):
         """Test successful async API request."""
         # Setup mock response
         mock_response = Mock()
@@ -274,9 +265,7 @@ class TestAPIRequestPayload:
     """Test that API request payload is constructed correctly."""
 
     @patch("httpx.post")
-    def test_request_payload_structure(
-        self, mock_post, mock_api_key, valid_coordinates, mock_api_response_data
-    ):
+    def test_request_payload_structure(self, mock_post, mock_api_key, valid_coordinates, mock_api_response_data):
         """Test the structure of the request payload."""
         mock_response = Mock()
         mock_response.status_code = 200
@@ -309,9 +298,7 @@ class TestAPIRequestPayload:
         assert payload["key"] == mock_api_key
 
     @patch("httpx.post")
-    def test_model_value_in_payload(
-        self, mock_post, mock_api_key, valid_coordinates, mock_api_response_data
-    ):
+    def test_model_value_in_payload(self, mock_post, mock_api_key, valid_coordinates, mock_api_response_data):
         """Test that model enum values are correctly serialized in the payload."""
         mock_response = Mock()
         mock_response.status_code = 200
