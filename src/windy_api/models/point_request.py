@@ -192,7 +192,7 @@ class WindyPointRequest(BaseModel):
             # Issue warning about invalid parameters
             warnings.warn(
                 f"Parameters {invalid_params} are not available for model '{self.model}' "
-                f"and will be removed. Available parameters: {sorted([p.value for p in available_params])}",  # noqa: E501
+                f"and will be removed. Available parameters: {sorted([p.value for p in available_params])}",
                 UserWarning,
                 stacklevel=2,
             )
@@ -209,7 +209,7 @@ class WindyPointRequest(BaseModel):
         if invalid_levels:
             warnings.warn(
                 f"Levels {invalid_levels} are not available for model '{self.model}' "
-                f"and will be removed. Available levels: {sorted([level.value for level in available_levels])}",  # noqa: E501
+                f"and will be removed. Available levels: {sorted([level.value for level in available_levels])}",
                 UserWarning,
                 stacklevel=2,
             )

@@ -15,7 +15,8 @@ Python Windy API package for interacting with the Windy API. Currently only supp
 - **Automatic Validation**: Built-in parameter validation ensures only compatible parameters are requested for each model
 - **Async Support**: Full async/await support for concurrent API requests with `get_point_forecast_async()`
 - **Type Safety**: Strongly typed with Pydantic models for reliable data validation and IDE autocomplete
-- **Easy Data Access**: Intuitive response objects with helper methods like `get_data()` and `get_unit()` for accessing forecast data
+- **Intuitive Data Access**: Clean accessor pattern for accessing forecast data - use `response.temp["surface"]`
+- **Clean Representations**: Response objects display in a clean, readable format showing only high-level parameters
 - **Error Handling**: Clear error messages and exceptions for robust application development
 
 
@@ -51,10 +52,23 @@ response = api.get_point_forecast(
     parameters=["temp", "wind"]
 )
 
-# Access forecast data
+# View the response structure
+print(response)
+# WindyForecastResponse(
+#   timestamps=37 entries,
+#   parameters=[temp, wind]
+# )
+
+# Access forecast data using clean accessor pattern
 print(f"Timestamps: {response.ts}")
-print(f"Temperature data: {response.get_data('temp-surface')}")
-print(f"Temperature unit: {response.get_unit('temp-surface')}")
+print(f"Temperature data: {response.temp['surface']}")
+print(f"Temperature unit: {response.temp.units}")
+print(f"Available levels: {response.temp.levels()}")
+
+# Access wind components
+print(f"Wind U component: {response.wind.u['surface']}")
+print(f"Wind V component: {response.wind.v['surface']}")
+print(f"Wind unit: {response.wind.u.units}")
 ```
 
 ### Available Weather Models
@@ -91,6 +105,60 @@ Common weather parameters you can request:
 
 Upon submitting a request to the Windy API the request is validated. If a parameter is requested for a model that does not support it, the incompatible parameters will automatically be removed from the request on validation.
 
+### Accessing Response Data
+
+The response object provides a clean, intuitive accessor pattern for retrieving forecast data:
+
+#### Parameter Accessors
+
+For parameters with multiple levels (e.g., temperature at different altitudes):
+
+```python
+# Access data at specific levels
+temp_surface = response.temp["surface"]  # Temperature at surface
+temp_850h = response.temp["850h"]        # Temperature at 850 hPa
+
+# Get the unit (same across all levels)
+print(response.temp.units)  # "K" (Kelvin)
+
+# List all available levels
+print(response.temp.levels())  # ["surface", "1000h", "950h", ...]
+
+# Iterate over all levels
+for level, data in response.temp.items():
+    print(f"{level}: {data}")
+```
+
+#### Surface-Only Parameters
+
+For parameters that only have surface data:
+
+```python
+# Access values and units directly
+precip_values = response.precip.values
+precip_unit = response.precip.units
+
+pressure_values = response.pressure.values
+pressure_unit = response.pressure.units
+```
+
+#### Complex Parameters (Wind, Waves)
+
+Some parameters have multiple components:
+
+```python
+# Wind has u (east-west) and v (north-south) components
+wind_u = response.wind.u["surface"]
+wind_v = response.wind.v["surface"]
+print(response.wind.u.units)  # "m*s-1"
+
+# Waves have height, period, and direction
+wave_height = response.waves.height.values
+wave_period = response.waves.period.values
+wave_direction = response.waves.direction.values
+print(response.waves.height.units)  # "m"
+```
+
 ### Detailed Examples
 
 #### Multiple Parameters
@@ -104,13 +172,17 @@ response = api.get_point_forecast(
     parameters=["temp", "dewpoint", "pressure", "rh", "precip"]
 )
 
-# Access each parameter
-for timestamp in response.ts:
-    print(f"Time: {timestamp}")
+# View available parameters
+print(f"Available parameters: {response.available_parameters()}")
 
-temp_data = response.get_data("temp-surface")
-dewpoint_data = response.get_data("dewpoint-surface")
-pressure_data = response.get_data("pressure-surface")
+# Access each parameter using the clean accessor pattern
+for i, timestamp in enumerate(response.ts):
+    print(f"Time: {timestamp}")
+    print(f"  Temperature: {response.temp['surface'][i]} {response.temp.units}")
+    print(f"  Dewpoint: {response.dewpoint['surface'][i]} {response.dewpoint.units}")
+    print(f"  Pressure: {response.pressure.values[i]} {response.pressure.units}")
+    print(f"  Relative Humidity: {response.rh['surface'][i]} {response.rh.units}")
+    print(f"  Precipitation: {response.precip.values[i]} {response.precip.units}")
 ```
 
 #### Working with Wind Data
@@ -124,11 +196,17 @@ response = api.get_point_forecast(
     parameters=["wind", "windGust"]
 )
 
-# Get wind components
-wind_u = response.get_data("wind_u-surface")  # East-west component
-wind_v = response.get_data("wind_v-surface")  # North-south component
-wind_gust = response.get_data("windGust-surface")
+# Access wind components using the accessor pattern
+wind_u_data = response.wind.u["surface"]  # East-west component
+wind_v_data = response.wind.v["surface"]  # North-south component
+wind_gust_data = response.windGust.values  # Wind gusts
 
+# Get units
+print(f"Wind unit: {response.wind.u.units}")
+print(f"Gust unit: {response.windGust.units}")
+
+# Check available levels for wind
+print(f"Available wind levels: {response.wind.u.levels()}")
 ```
 
 #### Async Usage
