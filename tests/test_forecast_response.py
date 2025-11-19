@@ -2,6 +2,8 @@
 
 from datetime import datetime, timezone
 
+import pytest
+
 from windy_api.schema.schema import WindyForecastResponse
 
 
@@ -52,13 +54,15 @@ class TestDynamicFields:
     """Test dynamic parameter-level field storage."""
 
     def test_dynamic_field_storage(self, mock_api_response_data):
-        """Test that dynamic fields are stored correctly."""
+        """Test that dynamic fields are stored correctly in model_extra."""
         response = WindyForecastResponse(**mock_api_response_data)
 
-        # Check that dynamic fields exist
-        assert hasattr(response, "temp-surface")
-        assert hasattr(response, "wind_u-surface")
-        assert hasattr(response, "wind_v-surface")
+        # Check that dynamic fields exist in model_extra
+        # Note: Direct access to "temp-surface" is blocked by __getattr__
+        # Use model_extra or the accessor pattern instead
+        assert "temp-surface" in response.model_extra
+        assert "wind_u-surface" in response.model_extra
+        assert "wind_v-surface" in response.model_extra
 
     def test_dynamic_field_values(self, mock_api_response_data):
         """Test that dynamic field values match input."""
@@ -238,3 +242,84 @@ class TestResponseIntegration:
         assert len(response.ts) == 1
         assert isinstance(response.ts[0], datetime)
         assert response.units == {}
+
+
+class TestAccessorPattern:
+    """Test the new accessor pattern for cleaner data access."""
+
+    def test_parameter_accessor(self, mock_api_response_data):
+        """Test accessing parameter data using the accessor pattern."""
+        response = WindyForecastResponse(**mock_api_response_data)
+
+        # Access temperature using accessor pattern
+        temp_data = response.temp["surface"]
+        assert temp_data == [15.2, 14.8, 14.3]
+
+        # Get units via accessor
+        assert response.temp.units == "°C"
+
+    def test_parameter_levels(self, mock_api_response_multiple_levels):
+        """Test listing available levels for a parameter."""
+        response = WindyForecastResponse(**mock_api_response_multiple_levels)
+
+        # Get available levels for temperature
+        temp_levels = response.temp.levels()
+        assert "surface" in temp_levels
+        assert "850h" in temp_levels
+
+    def test_parameter_items(self, mock_api_response_multiple_levels):
+        """Test iterating over parameter levels."""
+        response = WindyForecastResponse(**mock_api_response_multiple_levels)
+
+        # Iterate over all temperature levels
+        items = response.temp.items()
+        assert len(items) == 2
+        assert any(level == "surface" for level, _ in items)
+        assert any(level == "850h" for level, _ in items)
+
+    def test_wind_accessor(self, mock_api_response_data):
+        """Test accessing wind components using the wind accessor."""
+        response = WindyForecastResponse(**mock_api_response_data)
+
+        # Access wind components
+        wind_u = response.wind.u["surface"]
+        wind_v = response.wind.v["surface"]
+
+        assert wind_u == [3.5, 4.2, 4.8]
+        assert wind_v == [2.1, 2.3, 2.6]
+
+        # Get units
+        assert response.wind.u.units == "m/s"
+        assert response.wind.v.units == "m/s"
+
+    def test_direct_access_blocked(self, mock_api_response_data):
+        """Test that direct access to raw parameter-level keys is blocked."""
+        response = WindyForecastResponse(**mock_api_response_data)
+
+        # Attempting to access raw keys should raise AttributeError
+        with pytest.raises(AttributeError) as exc_info:
+            _ = response.__getattr__("temp-surface")
+
+        assert "temp-surface" in str(exc_info.value)
+        assert "accessor pattern" in str(exc_info.value)
+
+    def test_available_parameters(self, mock_api_response_data):
+        """Test listing available parameters."""
+        response = WindyForecastResponse(**mock_api_response_data)
+
+        params = response.available_parameters()
+        assert "temp" in params
+        assert "wind" in params
+
+    def test_clean_repr(self, mock_api_response_data):
+        """Test clean representation of response."""
+        response = WindyForecastResponse(**mock_api_response_data)
+
+        repr_str = repr(response)
+        assert "WindyForecastResponse" in repr_str
+        assert "timestamps=3 entries" in repr_str
+        assert "parameters=" in repr_str
+
+        # Should NOT contain raw parameter keys
+        assert "temp-surface" not in repr_str
+        assert "wind_u-surface" not in repr_str
