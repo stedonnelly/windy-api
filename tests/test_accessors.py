@@ -334,6 +334,42 @@ class TestSurfaceDataAccessor:
         assert response.cosc.values == [0.00001]
         assert response.cosc.units == "kg*m-3"
 
+    def test_weather_warnings(self):
+        """Test accessing weather warnings via camelCase accessor."""
+        data = {
+            "ts": [1700000000000],
+            "units": {"weatherwarnings-surface": None},
+            "weatherwarnings-surface": [3],
+        }
+        response = WindyForecastResponse(**data)
+
+        assert response.weatherWarnings.values == [3]
+        assert response.weatherWarnings.units is None
+
+    def test_cbase_with_parameter_accessor(self):
+        """Test accessing cloud base height via standard parameter accessor."""
+        data = {
+            "ts": [1700000000000],
+            "units": {"cbase-surface": "m"},
+            "cbase-surface": [850.0],
+        }
+        response = WindyForecastResponse(**data)
+
+        assert response.cbase["surface"] == [850.0]
+        assert response.cbase.units == "m"
+
+    def test_visibility_with_parameter_accessor(self):
+        """Test accessing visibility via standard parameter accessor."""
+        data = {
+            "ts": [1700000000000],
+            "units": {"visibility-surface": "m"},
+            "visibility-surface": [12000.0],
+        }
+        response = WindyForecastResponse(**data)
+
+        assert response.visibility["surface"] == [12000.0]
+        assert response.visibility.units == "m"
+
 
 class TestWaveAccessors:
     """Test wave-related accessors."""

@@ -86,12 +86,20 @@ class TestModelValidation:
         ("model", "parameters"),
         [
             (ModelTypes.AROME, [ValidParameters.TEMP, ValidParameters.WIND]),
+            (ModelTypes.AROME_Antilles, [ValidParameters.TEMP, ValidParameters.WIND]),
+            (ModelTypes.AROME_France, [ValidParameters.TEMP, ValidParameters.WIND]),
+            (ModelTypes.AROME_Reunion, [ValidParameters.TEMP, ValidParameters.WIND]),
             (ModelTypes.ICONEU, [ValidParameters.TEMP, ValidParameters.WIND]),
+            (ModelTypes.ICON, [ValidParameters.TEMP, ValidParameters.WIND]),
+            (ModelTypes.ICOND2, [ValidParameters.TEMP, ValidParameters.WIND]),
             (ModelTypes.GFS, [ValidParameters.TEMP, ValidParameters.WIND]),
             (ModelTypes.GFS_WAVE, [ValidParameters.WAVES, ValidParameters.SWELL1]),
             (ModelTypes.NAMCONUS, [ValidParameters.TEMP, ValidParameters.WIND]),
             (ModelTypes.NAMHAWAII, [ValidParameters.TEMP, ValidParameters.WIND]),
             (ModelTypes.NAMALASKA, [ValidParameters.TEMP, ValidParameters.WIND]),
+            (ModelTypes.HRRR_CONUS, [ValidParameters.TEMP, ValidParameters.WIND]),
+            (ModelTypes.HRRR_ALASKA, [ValidParameters.TEMP, ValidParameters.WIND]),
+            (ModelTypes.CAN_HRDPS, [ValidParameters.TEMP, ValidParameters.WIND]),
             (ModelTypes.CAMS, [ValidParameters.COSC, ValidParameters.DUSTSM]),
         ],
     )
@@ -288,6 +296,53 @@ class TestAPIKeyHandling:
 
 class TestModelSpecificParameters:
     """Test model-specific parameter availability validation."""
+
+    def test_icon_eu_supports_additional_surface_parameters(self, mock_api_key):
+        """Test that iconEu accepts cbase, visibility, and weatherWarnings."""
+        request = WindyPointRequest(
+            lat=0,
+            lon=0,
+            model=ModelTypes.ICONEU,
+            parameters=[
+                ValidParameters.CBASE,
+                ValidParameters.VISIBILITY,
+                ValidParameters.WEATHER_WARNINGS,
+            ],
+            key=mock_api_key,
+        )
+        assert "cbase" in request.parameters
+        assert "visibility" in request.parameters
+        assert "weatherWarnings" in request.parameters
+
+    def test_icon_d2_supports_additional_surface_parameters(self, mock_api_key):
+        """Test that iconD2 accepts cbase, visibility, and weatherWarnings."""
+        request = WindyPointRequest(
+            lat=0,
+            lon=0,
+            model=ModelTypes.ICOND2,
+            parameters=[
+                ValidParameters.CBASE,
+                ValidParameters.VISIBILITY,
+                ValidParameters.WEATHER_WARNINGS,
+            ],
+            key=mock_api_key,
+        )
+        assert "cbase" in request.parameters
+        assert "visibility" in request.parameters
+        assert "weatherWarnings" in request.parameters
+
+    def test_visibility_filtered_for_unsupported_model(self, mock_api_key):
+        """Test that visibility is removed when requested for unsupported models."""
+        with pytest.warns(UserWarning, match="not available for model 'gfs'"):
+            request = WindyPointRequest(
+                lat=0,
+                lon=0,
+                model=ModelTypes.GFS,
+                parameters=[ValidParameters.VISIBILITY, ValidParameters.TEMP],
+                key=mock_api_key,
+            )
+            assert "temp" in request.parameters
+            assert "visibility" not in request.parameters
 
     def test_wave_parameters_valid_for_gfs_wave(self, mock_api_key):
         """Test that wave parameters are accepted for GFS Wave model."""

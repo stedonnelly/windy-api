@@ -24,6 +24,27 @@ class TestWindyAPIInitialization:
         client = WindyAPI(api_key=mock_api_key)
         assert "api.windy.com" in client.point_forecast_url or "windy" in client.point_forecast_url.lower()
 
+    def test_get_model_types_includes_all_models(self, mock_api_key):
+        """Test that the enum members are surfaced by the client."""
+        client = WindyAPI(api_key=mock_api_key)
+        model_types = client.get_model_types()
+        
+        assert "arome" in model_types
+        assert "aromeAntilles" in model_types
+        assert "aromeFrance" in model_types
+        assert "aromeReunion" in model_types
+        assert "icon" in model_types
+        assert "iconD2" in model_types
+        assert "iconEu" in model_types
+        assert "gfs" in model_types
+        assert "namConus" in model_types
+        assert "namHawaii" in model_types
+        assert "namAlaska" in model_types
+        assert "hrrrConus" in model_types
+        assert "hrrrAlaska" in model_types
+        assert "gfsWave" in model_types
+        assert "canHrdps" in model_types
+
 
 class TestSyncGetPointForecast:
     """Test synchronous get_point_forecast method."""

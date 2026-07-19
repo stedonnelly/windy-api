@@ -311,6 +311,30 @@ class TestAccessorPattern:
         assert "temp" in params
         assert "wind" in params
 
+    def test_available_parameters_with_weather_warnings(self):
+        """Test weather warnings key maps to weatherWarnings accessor name."""
+        data = {
+            "ts": [1700000000000],
+            "units": {"weatherwarnings-surface": None},
+            "weatherwarnings-surface": [2],
+        }
+        response = WindyForecastResponse(**data)
+
+        params = response.available_parameters()
+        assert "weatherWarnings" in params
+
+    def test_weather_warnings_accessor(self):
+        """Test camelCase weatherWarnings accessor for lowercase API field."""
+        data = {
+            "ts": [1700000000000],
+            "units": {"weatherwarnings-surface": None},
+            "weatherwarnings-surface": [2],
+        }
+        response = WindyForecastResponse(**data)
+
+        assert response.weatherWarnings.values == [2]
+        assert response.weatherWarnings.units is None
+
     def test_clean_repr(self, mock_api_response_data):
         """Test clean representation of response."""
         response = WindyForecastResponse(**mock_api_response_data)
