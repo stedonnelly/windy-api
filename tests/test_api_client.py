@@ -28,7 +28,7 @@ class TestWindyAPIInitialization:
         """Test that the enum members are surfaced by the client."""
         client = WindyAPI(api_key=mock_api_key)
         model_types = client.get_model_types()
-        
+
         assert "arome" in model_types
         assert "aromeAntilles" in model_types
         assert "aromeFrance" in model_types

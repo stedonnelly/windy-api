@@ -57,7 +57,7 @@ class ValidParameters(str, Enum):
     SO2SM = "so2sm"  # Sulfur dioxide
     DUSTSM = "dustsm"
     COSC = "cosc"  # Carbon monoxide
-    
+
     # Additional parameters for ICON models
     CBASE = "cbase"  # Cloud base height
     VISIBILITY = "visibility"  # Visibility
@@ -117,7 +117,7 @@ ICON_PARAMETERS = COMMON_PARAMETERS | {
     ValidParameters.CONV_PRECIP,
     ValidParameters.SNOW_PRECIP,
     ValidParameters.PTYPE,
-    ValidParameters.WEATHER_WARNINGS
+    ValidParameters.WEATHER_WARNINGS,
 }
 
 ICON_D2_PARAMETERS = ICON_PARAMETERS | {
@@ -130,7 +130,7 @@ ICON_EU_PARAMETERS = ICON_PARAMETERS | {
     ValidParameters.CBASE,
     ValidParameters.VISIBILITY,
 }
-    
+
 
 GFS_PARAMETERS = COMMON_PARAMETERS | {
     ValidParameters.CONV_PRECIP,
@@ -145,7 +145,7 @@ NAM_PARAMETERS = COMMON_PARAMETERS | {
     ValidParameters.PTYPE,
     ValidParameters.GH,
 }
-   
+
 HRRR_PARAMETERS = COMMON_PARAMETERS | {
     ValidParameters.CONV_PRECIP,
     ValidParameters.SNOW_PRECIP,
@@ -201,11 +201,14 @@ MODEL_LEVELS_MAP: dict[ModelTypes, set[Levels]] = {
     ModelTypes.CAN_HRDPS: set(Levels),
     ModelTypes.CAMS: {Levels.SURFACE},
 }
+
+
 class WindyPointRequest(BaseModel):
     """Request model for Windy Point Forecast API.
 
     Supports multiple weather models with model-specific parameter availability:
-    - All models support common parameters (temp, dewpoint, precip, wind, windGust, cape, lclouds, mclouds, hclouds, rh, pressure)
+    - All models support common parameters (temp, dewpoint, precip, wind, windGust, cape,
+    lclouds, mclouds, hclouds, rh, pressure)
     - All AROME models support common + snowPrecip, ptype
     - AROME supports additional common + snowPrecip, ptype, convPrecip
     - ICON models support common + snowPrecip, ptype, convPrecip, weatherWarnings
@@ -235,7 +238,8 @@ class WindyPointRequest(BaseModel):
         default_factory=lambda: [ValidParameters.TEMP, ValidParameters.WIND],
         description=(
             "Weather parameters to retrieve. "
-            "Common (all models except gfsWave, cams): temp, dewpoint, precip, wind, windGust, cape, lclouds, mclouds, hclouds, rh, pressure. "
+            "Common (all models except gfsWave, cams): temp, dewpoint, precip, wind, windGust, cape,"
+            "lclouds, mclouds, hclouds, rh, pressure. "
             "AROME: snowPrecip, ptype, convPrecip. "
             "ICON: snowPrecip, ptype, convPrecip, weatherWarnings. "
             "ICON D2: cbase, visibility. "
