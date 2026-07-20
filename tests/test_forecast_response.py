@@ -311,6 +311,91 @@ class TestAccessorPattern:
         assert "temp" in params
         assert "wind" in params
 
+    def test_available_parameters_wave(self):
+        """Test available parameters includes wave parameters."""
+        data = {
+            "ts": [1700000000000],
+            "units": {
+                "waves_height-surface": "m",
+                "windWaves_height-surface": "m",
+                "waves_power-surface": "W/m",
+            },
+            "waves_height-surface": [2.5],
+            "wwaves_height-surface": [1.5],
+            "waves_power-surface": [1200.0],
+        }
+        response = WindyForecastResponse(**data)
+
+        params = response.available_parameters()
+        assert "waves" in params
+        assert "windWaves" in params
+        assert "wavesPower" in params
+
+    def test_available_parameters_currents(self):
+        """Test available parameters includes ocean currents."""
+        data = {
+            "ts": [1700000000000],
+            "units": {
+                "seacurrents_u-surface": "m/s",
+                "seacurrents_v-surface": "m/s",
+                "seacurrents_tide_u-surface": "m/s",
+                "seacurrents_tide_v-surface": "m/s",
+            },
+            "seacurrents_u-surface": [0.4],
+            "seacurrents_v-surface": [0.2],
+            "seacurrents_tide_u-surface": [0.1],
+            "seacurrents_tide_v-surface": [0.3],
+        }
+        response = WindyForecastResponse(**data)
+
+        params = response.available_parameters()
+        assert "currents" in params
+        assert "currentsTide" in params
+
+    def test_waves_power_accessor(self):
+        """Test accessing wave power via accessor."""
+        data = {
+            "ts": [1700000000000],
+            "units": {"waves_power-surface": "W/m"},
+            "waves_power-surface": [1200.0],
+        }
+        response = WindyForecastResponse(**data)
+
+        assert response.wavesPower.values == [1200.0]
+        assert response.wavesPower.units == "W/m"
+
+    def test_currents_accessor(self):
+        """Test accessing currents via accessor."""
+        data = {
+            "ts": [1700000000000],
+            "units": {
+                "seacurrents_u-surface": "m/s",
+                "seacurrents_v-surface": "m/s",
+            },
+            "seacurrents_u-surface": [0.4],
+            "seacurrents_v-surface": [0.2],
+        }
+        response = WindyForecastResponse(**data)
+
+        assert response.currents.u.values == [0.4]
+        assert response.currents.v.values == [0.2]
+
+    def test_currents_tide_accessor(self):
+        """Test accessing tidal currents via accessor."""
+        data = {
+            "ts": [1700000000000],
+            "units": {
+                "seacurrents_tide_u-surface": "m/s",
+                "seacurrents_tide_v-surface": "m/s",
+            },
+            "seacurrents_tide_u-surface": [0.1],
+            "seacurrents_tide_v-surface": [0.3],
+        }
+        response = WindyForecastResponse(**data)
+
+        assert response.currentsTide.u.values == [0.1]
+        assert response.currentsTide.v.values == [0.3]
+
     def test_clean_repr(self, mock_api_response_data):
         """Test clean representation of response."""
         response = WindyForecastResponse(**mock_api_response_data)

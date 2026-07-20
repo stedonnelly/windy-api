@@ -451,6 +451,54 @@ class TestWaveAccessors:
         assert response.swell2.period.values == [12.0]
         assert response.swell2.direction.values == [200.0]
 
+    def test_waves_power(self):
+        """Test accessing wave power."""
+        data = {
+            "ts": [1700000000000],
+            "units": {"waves_power-surface": "W/m"},
+            "waves_power-surface": [1200.0],
+        }
+        response = WindyForecastResponse(**data)
+
+        assert response.wavesPower.values == [1200.0]
+        assert response.wavesPower.units == "W/m"
+
+    def test_currents(self):
+        """Test accessing ocean surface currents."""
+        data = {
+            "ts": [1700000000000],
+            "units": {
+                "seacurrents_u-surface": "m/s",
+                "seacurrents_v-surface": "m/s",
+            },
+            "seacurrents_u-surface": [0.4],
+            "seacurrents_v-surface": [0.2],
+        }
+        response = WindyForecastResponse(**data)
+
+        assert response.currents.u.values == [0.4]
+        assert response.currents.v.values == [0.2]
+        assert response.currents.u.units == "m/s"
+        assert response.currents.v.units == "m/s"
+
+    def test_currents_tide(self):
+        """Test accessing tidal ocean surface currents."""
+        data = {
+            "ts": [1700000000000],
+            "units": {
+                "seacurrents_tide_u-surface": "m/s",
+                "seacurrents_tide_v-surface": "m/s",
+            },
+            "seacurrents_tide_u-surface": [0.1],
+            "seacurrents_tide_v-surface": [0.3],
+        }
+        response = WindyForecastResponse(**data)
+
+        assert response.currentsTide.u.values == [0.1]
+        assert response.currentsTide.v.values == [0.3]
+        assert response.currentsTide.u.units == "m/s"
+        assert response.currentsTide.v.units == "m/s"
+
 
 class TestAvailableParameters:
     """Test available_parameters method."""

@@ -7,13 +7,20 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 class ModelTypes(str, Enum):
     """Available weather forecast models"""
 
+    # Weather forecast models
     AROME = "arome"
     ICONEU = "iconEu"
     GFS = "gfs"
-    GFS_WAVE = "gfsWave"
     NAMCONUS = "namConus"
     NAMHAWAII = "namHawaii"
     NAMALASKA = "namAlaska"
+    # Sea and wave forecast models
+    GFS_WAVE = "gfsWave"
+    ICON_WAVE = "iconWave"
+    ICONEU_WAVE = "iconEuWave"
+    CAN_RDPS_WAVE = "canRdpsWave"
+    CMEMS_WAVE = "cmems"
+    # Atmospheric composition model
     CAMS = "cams"
 
 
@@ -39,16 +46,19 @@ class ValidParameters(str, Enum):
     GH = "gh"
     PRESSURE = "pressure"
 
-    # Wave-specific parameters (GFS Wave only)
-    WAVES = "waves"
-    WIND_WAVES = "windWaves"
-    SWELL1 = "swell1"
-    SWELL2 = "swell2"
-
     # Additional atmospheric parameters (CAMS only)
     SO2SM = "so2sm"  # Sulfur dioxide
     DUSTSM = "dustsm"
     COSC = "cosc"  # Carbon monoxide
+
+    # Wave-specific parameters
+    WAVES = "waves"
+    WAVES_POWER = "wavesPower"
+    WIND_WAVES = "windWaves"
+    SWELL1 = "swell1"
+    SWELL2 = "swell2"
+    CURRENTS = "currents"
+    CURRENTS_TIDE = "currentsTide"
 
 
 class Levels(str, Enum):
@@ -110,6 +120,28 @@ AROME_PARAMETERS = {
     ValidParameters.RH,
 }
 
+GFS_WAVE_PARAMETERS = {
+    ValidParameters.WAVES,
+    ValidParameters.WAVES_POWER,
+    ValidParameters.WIND_WAVES,
+    ValidParameters.SWELL1,
+    ValidParameters.SWELL2,
+}
+
+ICON_WAVE_PARAMETERS = {ValidParameters.WAVES, ValidParameters.WAVES_POWER, ValidParameters.SWELL1}
+
+CAN_RDPS_WAVE_PARAMETERS = {
+    ValidParameters.WAVES,
+    ValidParameters.WAVES_POWER,
+    ValidParameters.SWELL1,
+    ValidParameters.SWELL2,
+}
+
+CMEMS_WAVE_PARAMETERS = {
+    ValidParameters.CURRENTS,
+    ValidParameters.CURRENTS_TIDE,
+}
+
 # Atmospheric composition parameters
 ATMOSPHERIC_PARAMETERS = {
     ValidParameters.SO2SM,
@@ -120,6 +152,7 @@ ATMOSPHERIC_PARAMETERS = {
 
 # Model-specific parameter availability mapping
 MODEL_PARAMETER_MAP: dict[ModelTypes, set[ValidParameters]] = {
+    # Weather forecast models
     ModelTypes.AROME: AROME_PARAMETERS,
     ModelTypes.ICONEU: COMMON_PARAMETERS,
     ModelTypes.GFS: COMMON_PARAMETERS,
@@ -127,17 +160,31 @@ MODEL_PARAMETER_MAP: dict[ModelTypes, set[ValidParameters]] = {
     ModelTypes.NAMCONUS: COMMON_PARAMETERS,
     ModelTypes.NAMHAWAII: COMMON_PARAMETERS,
     ModelTypes.NAMALASKA: COMMON_PARAMETERS,
+    # Sea and wave forecast models
+    ModelTypes.GFS_WAVE: GFS_WAVE_PARAMETERS,
+    ModelTypes.ICON_WAVE: ICON_WAVE_PARAMETERS,
+    ModelTypes.ICONEU_WAVE: ICON_WAVE_PARAMETERS,
+    ModelTypes.CAN_RDPS_WAVE: CAN_RDPS_WAVE_PARAMETERS,
+    ModelTypes.CMEMS_WAVE: CMEMS_WAVE_PARAMETERS,
+    # Atmospheric composition model
     ModelTypes.CAMS: ATMOSPHERIC_PARAMETERS,
 }
 
 MODEL_LEVELS_MAP: dict[ModelTypes, set[Levels]] = {
+    # Weather forecast models
     ModelTypes.AROME: set(Levels),
     ModelTypes.ICONEU: set(Levels),
     ModelTypes.GFS: set(Levels),
-    ModelTypes.GFS_WAVE: {Levels.SURFACE},
     ModelTypes.NAMCONUS: set(Levels),
     ModelTypes.NAMHAWAII: set(Levels),
     ModelTypes.NAMALASKA: set(Levels),
+    # Sea and wave forecast models
+    ModelTypes.GFS_WAVE: {Levels.SURFACE},
+    ModelTypes.ICON_WAVE: {Levels.SURFACE},
+    ModelTypes.ICONEU_WAVE: {Levels.SURFACE},
+    ModelTypes.CAN_RDPS_WAVE: {Levels.SURFACE},
+    ModelTypes.CMEMS_WAVE: {Levels.SURFACE},
+    # Atmospheric composition model
     ModelTypes.CAMS: {Levels.SURFACE},
 }
 
@@ -172,7 +219,10 @@ class WindyPointRequest(BaseModel):
             "snowPrecip, wind, windGust, cape, ptype, lclouds, mclouds, hclouds, rh, gh, pressure. "
             "Arome-specific: temp, dewpoint, precip, convPrecip, wind, windGust, cape, ptype, "
             "lclouds, mclouds, hclouds, rh."
-            "Wave (gfsWave only): waves, windWaves, swell1, swell2, swell3. "
+            "GFS_WAVE: waves, wavesPower, windWaves, swell1, swell2."
+            "ICON_WAVE: waves, wavesPower, swell1."
+            "CAN_RDPS_WAVE: waves, wavesPower, swell1, swell2."
+            "CMEMS_WAVE: currents, currentsTide."
             "Atmospheric (cams only): so2sm, dustsm, cosc"
         ),
     )

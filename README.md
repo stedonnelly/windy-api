@@ -10,8 +10,8 @@ Python Windy API package for interacting with the Windy API. Currently only supp
 ## Features
 
 - **Point Forecast API**: Get detailed weather forecasts for any geographic location using latitude/longitude coordinates
-- **Multiple Weather Models**: Support for 7+ weather forecast models including GFS, ICON EU, GFS Wave, NAM regional models, and CAMS air quality
-- **Comprehensive Parameters**: Access 20+ weather parameters including temperature, wind, precipitation, humidity, clouds, pressure, CAPE, and more
+- **Multiple Weather Models**: Support for weather forecast and marine models including GFS, ICON, ICON EU, GFS Wave, ICON Wave, CAN RDPS Wave, CMEMS Wave, NAM regional models, and CAMS air quality
+- **Comprehensive Parameters**: Access weather and marine parameters including temperature, wind, precipitation, humidity, clouds, pressure, CAPE, wave power, currents, and more
 - **Automatic Validation**: Built-in parameter validation ensures only compatible parameters are requested for each model
 - **Async Support**: Full async/await support for concurrent API requests with `get_point_forecast_async()`
 - **Type Safety**: Strongly typed with Pydantic models for reliable data validation and IDE autocomplete
@@ -76,6 +76,10 @@ print(f"Wind unit: {response.wind.u.units}")
 The following weather forecast models are supported:
 
 - `gfs` - Global Forecast System (default)
+- `iconWave` - ICON Wave model
+- `iconEuWave` - ICON EU Wave model
+- `canRdpsWave` - Canadian RDPS Wave model
+- `cmemsWave` - CMEMS Wave model
 - `iconeu` - ICON EU regional model
 - `gfs_wave` - GFS Wave model
 - `namconus` - NAM CONUS regional model
@@ -157,6 +161,15 @@ wave_height = response.waves.height.values
 wave_period = response.waves.period.values
 wave_direction = response.waves.direction.values
 print(response.waves.height.units)  # "m"
+
+# Wave power
+print(response.wavesPower.values)
+
+# Ocean currents
+print(response.currents.u.values)
+print(response.currents.v.values)
+print(response.currentsTide.u.values)
+print(response.currentsTide.v.values)
 ```
 
 ### Detailed Examples

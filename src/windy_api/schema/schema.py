@@ -11,9 +11,11 @@ from .accessors import (
     Past3hPrecip,
     Past3hSnowPrecip,
     Pressure,
+    SeaCurrentsAccessor,
     Swell1Accessor,
     Swell2Accessor,
     WaveAccessor,
+    WavePowerAccessor,
     WindAccessor,
     WindGust,
     WindWaveAccessor,
@@ -68,6 +70,8 @@ class WindyForecastResponse(BaseModel):
             | WindWaveAccessor
             | Swell1Accessor
             | Swell2Accessor
+            | WavePowerAccessor
+            | SeaCurrentsAccessor
             | Past3hPrecip
             | Past3hConvPrecip
             | Past3hSnowPrecip
@@ -140,6 +144,7 @@ class WindyForecastResponse(BaseModel):
             "waves_height": "waves",
             "waves_period": "waves",
             "waves_direction": "waves",
+            "waves_power": "wavesPower",
             "wwaves_height": "windWaves",
             "wwaves_period": "windWaves",
             "wwaves_direction": "windWaves",
@@ -149,6 +154,10 @@ class WindyForecastResponse(BaseModel):
             "swell2_height": "swell2",
             "swell2_period": "swell2",
             "swell2_direction": "swell2",
+            "seacurrents_u": "currents",
+            "seacurrents_v": "currents",
+            "seacurrents_tide_u": "currentsTide",
+            "seacurrents_tide_v": "currentsTide",
             "past3hprecip": "precip",
             "past3hconvprecip": "convPrecip",
             "past3hsnowprecip": "snowPrecip",
@@ -173,6 +182,8 @@ class WindyForecastResponse(BaseModel):
         | WindWaveAccessor
         | Swell1Accessor
         | Swell2Accessor
+        | WavePowerAccessor
+        | SeaCurrentsAccessor
         | Past3hPrecip
         | Past3hConvPrecip
         | Past3hSnowPrecip
@@ -230,6 +241,37 @@ class WindyForecastResponse(BaseModel):
             if has_waves_height or has_waves_direction:
                 if name not in self._accessor_cache:
                     self._accessor_cache[name] = WaveAccessor(self)
+                return self._accessor_cache[name]
+
+        elif name == "wavesPower":
+            extra = getattr(self, "__pydantic_extra__", {}) or {}
+            has_waves_power = any(key.startswith("waves_power-") for key in extra)
+
+            if has_waves_power:
+                if name not in self._accessor_cache:
+                    self._accessor_cache[name] = WavePowerAccessor(self)
+                return self._accessor_cache[name]
+
+        elif name == "currents":
+            extra = getattr(self, "__pydantic_extra__", {}) or {}
+            has_currents = any(key.startswith("seacurrents_u-") for key in extra) or any(
+                key.startswith("seacurrents_v-") for key in extra
+            )
+
+            if has_currents:
+                if name not in self._accessor_cache:
+                    self._accessor_cache[name] = SeaCurrentsAccessor(self, "seacurrents")
+                return self._accessor_cache[name]
+
+        elif name == "currentsTide":
+            extra = getattr(self, "__pydantic_extra__", {}) or {}
+            has_currents_tide = any(key.startswith("seacurrents_tide_u-") for key in extra) or any(
+                key.startswith("seacurrents_tide_v-") for key in extra
+            )
+
+            if has_currents_tide:
+                if name not in self._accessor_cache:
+                    self._accessor_cache[name] = SeaCurrentsAccessor(self, "seacurrents_tide")
                 return self._accessor_cache[name]
 
         elif name == "windWaves":
