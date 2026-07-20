@@ -18,7 +18,7 @@ class ModelTypes(str, Enum):
     GFS_WAVE = "gfsWave"
     ICON_WAVE = "iconWave"
     ICONEU_WAVE = "iconEuWave"
-    CAN_RDPS_WAVE = "canRdpsWave"
+    CAN_RDWPS_WAVE = "canRdwpsWave"
     CMEMS_WAVE = "cmems"
     # Atmospheric composition model
     CAMS = "cams"
@@ -130,7 +130,7 @@ GFS_WAVE_PARAMETERS = {
 
 ICON_WAVE_PARAMETERS = {ValidParameters.WAVES, ValidParameters.WAVES_POWER, ValidParameters.SWELL1}
 
-CAN_RDPS_WAVE_PARAMETERS = {
+CAN_RDWPS_WAVE_PARAMETERS = {
     ValidParameters.WAVES,
     ValidParameters.WAVES_POWER,
     ValidParameters.SWELL1,
@@ -156,7 +156,6 @@ MODEL_PARAMETER_MAP: dict[ModelTypes, set[ValidParameters]] = {
     ModelTypes.AROME: AROME_PARAMETERS,
     ModelTypes.ICONEU: COMMON_PARAMETERS,
     ModelTypes.GFS: COMMON_PARAMETERS,
-    ModelTypes.GFS_WAVE: WAVE_PARAMETERS,
     ModelTypes.NAMCONUS: COMMON_PARAMETERS,
     ModelTypes.NAMHAWAII: COMMON_PARAMETERS,
     ModelTypes.NAMALASKA: COMMON_PARAMETERS,
@@ -164,7 +163,7 @@ MODEL_PARAMETER_MAP: dict[ModelTypes, set[ValidParameters]] = {
     ModelTypes.GFS_WAVE: GFS_WAVE_PARAMETERS,
     ModelTypes.ICON_WAVE: ICON_WAVE_PARAMETERS,
     ModelTypes.ICONEU_WAVE: ICON_WAVE_PARAMETERS,
-    ModelTypes.CAN_RDPS_WAVE: CAN_RDPS_WAVE_PARAMETERS,
+    ModelTypes.CAN_RDWPS_WAVE: CAN_RDWPS_WAVE_PARAMETERS,
     ModelTypes.CMEMS_WAVE: CMEMS_WAVE_PARAMETERS,
     # Atmospheric composition model
     ModelTypes.CAMS: ATMOSPHERIC_PARAMETERS,
@@ -182,7 +181,7 @@ MODEL_LEVELS_MAP: dict[ModelTypes, set[Levels]] = {
     ModelTypes.GFS_WAVE: {Levels.SURFACE},
     ModelTypes.ICON_WAVE: {Levels.SURFACE},
     ModelTypes.ICONEU_WAVE: {Levels.SURFACE},
-    ModelTypes.CAN_RDPS_WAVE: {Levels.SURFACE},
+    ModelTypes.CAN_RDWPS_WAVE: {Levels.SURFACE},
     ModelTypes.CMEMS_WAVE: {Levels.SURFACE},
     # Atmospheric composition model
     ModelTypes.CAMS: {Levels.SURFACE},
@@ -221,7 +220,7 @@ class WindyPointRequest(BaseModel):
             "lclouds, mclouds, hclouds, rh."
             "GFS_WAVE: waves, wavesPower, windWaves, swell1, swell2."
             "ICON_WAVE: waves, wavesPower, swell1."
-            "CAN_RDPS_WAVE: waves, wavesPower, swell1, swell2."
+            "CAN_RDWPS_WAVE: waves, wavesPower, swell1, swell2."
             "CMEMS_WAVE: currents, currentsTide."
             "Atmospheric (cams only): so2sm, dustsm, cosc"
         ),

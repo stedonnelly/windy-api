@@ -78,7 +78,7 @@ The following weather forecast models are supported:
 - `gfs` - Global Forecast System (default)
 - `iconWave` - ICON Wave model
 - `iconEuWave` - ICON EU Wave model
-- `canRdpsWave` - Canadian RDPS Wave model
+- `canRdwpsWave` - Canadian RDPS Wave model
 - `cmemsWave` - CMEMS Wave model
 - `iconeu` - ICON EU regional model
 - `gfs_wave` - GFS Wave model

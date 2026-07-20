@@ -91,7 +91,7 @@ class TestModelValidation:
             (ModelTypes.GFS_WAVE, [ValidParameters.WAVES, ValidParameters.SWELL1]),
             (ModelTypes.ICON_WAVE, [ValidParameters.WAVES, ValidParameters.WAVES_POWER, ValidParameters.SWELL1]),
             (ModelTypes.ICONEU_WAVE, [ValidParameters.WAVES, ValidParameters.WAVES_POWER, ValidParameters.SWELL1]),
-            (ModelTypes.CAN_RDPS_WAVE, [ValidParameters.WAVES, ValidParameters.WAVES_POWER, ValidParameters.SWELL1]),
+            (ModelTypes.CAN_RDWPS_WAVE, [ValidParameters.WAVES, ValidParameters.WAVES_POWER, ValidParameters.SWELL1]),
             (ModelTypes.CMEMS_WAVE, [ValidParameters.CURRENTS, ValidParameters.CURRENTS_TIDE]),
             (ModelTypes.NAMCONUS, [ValidParameters.TEMP, ValidParameters.WIND]),
             (ModelTypes.NAMHAWAII, [ValidParameters.TEMP, ValidParameters.WIND]),
@@ -338,12 +338,12 @@ class TestModelSpecificParameters:
         assert "wavesPower" in request.parameters
         assert "swell1" in request.parameters
 
-    def test_wave_parameters_valid_for_can_rdps_wave(self, mock_api_key):
-        """Test that wave parameters are accepted for CAN RDPS Wave model."""
+    def test_wave_parameters_valid_for_can_rdwps_wave(self, mock_api_key):
+        """Test that wave parameters are accepted for CAN RDWPS Wave model."""
         request = WindyPointRequest(
             lat=0,
             lon=0,
-            model=ModelTypes.CAN_RDPS_WAVE,
+            model=ModelTypes.CAN_RDWPS_WAVE,
             parameters=[ValidParameters.WAVES, ValidParameters.WAVES_POWER, ValidParameters.SWELL1],
             key=mock_api_key,
         )
