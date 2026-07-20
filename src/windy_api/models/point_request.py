@@ -216,7 +216,7 @@ class WindyPointRequest(BaseModel):
     - ICON EU supports common + snowPrecip, ptype, convPrecip, weatherWarnings, gh, cbase, visibility
     - GFS supports common + snowPrecip, ptype, convPrecip, gh
     - NAM models support common + snowPrecip, ptype, convPrecip, gh
-    - HRRR models support common + snowPrecip, ptype, convPrecip
+    - HRRR models support common + snowPrecip, convPrecip
     - CAN HRDPS supports common + convPrecip
     - GFS_WAVE: Common + wave parameters (waves, windWaves, swell1-3)
     - CAMS: Common + atmospheric parameters (so2sm, dustsm, cosc)
@@ -246,8 +246,8 @@ class WindyPointRequest(BaseModel):
             "ICON EU: gh, cbase, visibility. "
             "GFS: snowPrecip, ptype, convPrecip, gh. "
             "NAM: snowPrecip, ptype, convPrecip, gh. "
-            "HRRR: snowPrecip, ptype, convPrecip. "
-            "CAN HRDPS: snowPrecip, ptype, convPrecip. "
+            "HRRR: snowPrecip, convPrecip. "
+            "CAN HRDPS: convPrecip. "
             "Wave (gfsWave only): waves, windWaves, swell1, swell2, swell3. "
             "Atmospheric (cams only): so2sm, dustsm, cosc"
         ),
