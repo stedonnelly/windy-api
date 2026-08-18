@@ -82,6 +82,7 @@ The following weather forecast models are supported:
 - `namhawaii` - NAM Hawaii regional model
 - `namalaska` - NAM Alaska regional model
 - `cams` - CAMS air quality model
+- `camsEu` - CAMS EU air quality model
 
 ### Available Parameters
 

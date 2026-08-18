@@ -93,6 +93,7 @@ class TestModelValidation:
             (ModelTypes.NAMHAWAII, [ValidParameters.TEMP, ValidParameters.WIND]),
             (ModelTypes.NAMALASKA, [ValidParameters.TEMP, ValidParameters.WIND]),
             (ModelTypes.CAMS, [ValidParameters.COSC, ValidParameters.DUSTSM]),
+            (ModelTypes.CAMS_EU, [ValidParameters.COSC, ValidParameters.POLLEN_GRASS]),
         ],
     )
     def test_all_model_types(self, model, parameters, mock_api_key):
@@ -411,3 +412,103 @@ class TestModelSpecificParameters:
         assert "temp" in request.parameters
         assert "wind" in request.parameters
         assert "rh" in request.parameters
+
+
+class TestAirQualityParameters:
+    """Test air quality model parameter availability."""
+
+    def test_cams_supports_all_air_quality_params(self, mock_api_key):
+        request = WindyPointRequest(
+            lat=0,
+            lon=0,
+            model=ModelTypes.CAMS,
+            parameters=[
+                ValidParameters.AQI,
+                ValidParameters.SO2SM,
+                ValidParameters.DUSTSM,
+                ValidParameters.COSC,
+                ValidParameters.GO3,
+                ValidParameters.NO2,
+                ValidParameters.PM10,
+                ValidParameters.PM2P5,
+            ],
+            key=mock_api_key,
+        )
+        assert "aqi" in request.parameters
+        assert "so2sm" in request.parameters
+        assert "dustsm" in request.parameters
+        assert "cosc" in request.parameters
+        assert "go3" in request.parameters
+        assert "no2" in request.parameters
+        assert "pm10" in request.parameters
+        assert "pm2p5" in request.parameters
+
+    def test_cams_does_not_support_pollen(self, mock_api_key):
+        with pytest.warns(UserWarning, match="not available for model 'cams'"):
+            request = WindyPointRequest(
+                lat=0,
+                lon=0,
+                model=ModelTypes.CAMS,
+                parameters=[ValidParameters.COSC, ValidParameters.POLLEN_GRASS],
+                key=mock_api_key,
+            )
+        assert "cosc" in request.parameters
+        assert "pollenGrass" not in request.parameters
+
+    def test_cams_eu_supports_pollen(self, mock_api_key):
+        request = WindyPointRequest(
+            lat=0,
+            lon=0,
+            model=ModelTypes.CAMS_EU,
+            parameters=[
+                ValidParameters.POLLEN_ALDER,
+                ValidParameters.POLLEN_BIRCH,
+                ValidParameters.POLLEN_GRASS,
+                ValidParameters.POLLEN_MUGWORT,
+                ValidParameters.POLLEN_OLIVE,
+                ValidParameters.POLLEN_RAGWEED,
+            ],
+            key=mock_api_key,
+        )
+        assert "pollenAlder" in request.parameters
+        assert "pollenBirch" in request.parameters
+        assert "pollenGrass" in request.parameters
+        assert "pollenMugwort" in request.parameters
+        assert "pollenOlive" in request.parameters
+        assert "pollenRagweed" in request.parameters
+
+    def test_cams_eu_supports_all_cams_params(self, mock_api_key):
+        request = WindyPointRequest(
+            lat=0,
+            lon=0,
+            model=ModelTypes.CAMS_EU,
+            parameters=[ValidParameters.AQI, ValidParameters.GO3, ValidParameters.NO2],
+            key=mock_api_key,
+        )
+        assert "aqi" in request.parameters
+        assert "go3" in request.parameters
+        assert "no2" in request.parameters
+
+    def test_pollen_invalid_for_cams(self, mock_api_key):
+        with pytest.warns(UserWarning, match="not available for model 'cams'"):
+            request = WindyPointRequest(
+                lat=0,
+                lon=0,
+                model=ModelTypes.CAMS,
+                parameters=[ValidParameters.DUSTSM, ValidParameters.POLLEN_BIRCH],
+                key=mock_api_key,
+            )
+        assert "dustsm" in request.parameters
+        assert "pollenBirch" not in request.parameters
+
+    def test_air_quality_params_invalid_for_gfs(self, mock_api_key):
+        with pytest.warns(UserWarning, match="not available for model 'gfs'"):
+            request = WindyPointRequest(
+                lat=0,
+                lon=0,
+                model=ModelTypes.GFS,
+                parameters=[ValidParameters.TEMP, ValidParameters.AQI],
+                key=mock_api_key,
+            )
+        assert "temp" in request.parameters
+        assert "aqi" not in request.parameters
