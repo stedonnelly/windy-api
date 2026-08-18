@@ -318,6 +318,68 @@ class Swell2Accessor:
         )
 
 
+class WavePowerAccessor:
+    """
+    Accessor for wave power parameters.
+
+    Provides access to wave power data like:
+        response.wavesPower.values - wave power data at surface
+        response.wavesPower.units - wave power unit
+    """
+
+    def __init__(self, response: "WindyForecastResponse"):
+        self._response = response
+
+    @property
+    def values(self) -> list[float | None] | None:
+        """Access wave power data."""
+        return self._response.get_data("waves_power-surface")
+
+    @property
+    def units(self) -> str | None:
+        """Get the unit for wave power."""
+        return self._response.get_unit("waves_power-surface")
+
+    def __repr__(self) -> str:
+        return f"WavePower(values={self.values}, units={self.units})"
+
+
+class SeaCurrentsAccessor:
+    """
+    Accessor for ocean surface currents.
+
+    Provides access to current data like:
+        response.currents.u.values - east-west surface current component
+        response.currents.v.values - south-north surface current component
+    """
+
+    def __init__(self, response: "WindyForecastResponse", prefix: str = "seacurrents"):
+        self._response = response
+        self._prefix = prefix
+        self._u_accessor: SurfaceDataAccessor | None = None
+        self._v_accessor: SurfaceDataAccessor | None = None
+
+    @property
+    def u(self) -> SurfaceDataAccessor:
+        """Access the east-west current component."""
+        if self._u_accessor is None:
+            self._u_accessor = SurfaceDataAccessor(self._response, f"{self._prefix}_u-surface")
+        return self._u_accessor
+
+    @property
+    def v(self) -> SurfaceDataAccessor:
+        """Access the south-north current component."""
+        if self._v_accessor is None:
+            self._v_accessor = SurfaceDataAccessor(self._response, f"{self._prefix}_v-surface")
+        return self._v_accessor
+
+    def __repr__(self) -> str:
+        return (
+            f"SeaCurrentsAccessor(prefix='{self._prefix}', "
+            f"u={self.u.values is not None}, v={self.v.values is not None})"
+        )
+
+
 class Past3hPrecip:
     """
     Accessor for precipitation parameters with rain and snow components.

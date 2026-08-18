@@ -94,6 +94,10 @@ class TestModelValidation:
             (ModelTypes.ICOND2, [ValidParameters.TEMP, ValidParameters.WIND]),
             (ModelTypes.GFS, [ValidParameters.TEMP, ValidParameters.WIND]),
             (ModelTypes.GFS_WAVE, [ValidParameters.WAVES, ValidParameters.SWELL1]),
+            (ModelTypes.ICON_WAVE, [ValidParameters.WAVES, ValidParameters.WAVES_POWER, ValidParameters.SWELL1]),
+            (ModelTypes.ICONEU_WAVE, [ValidParameters.WAVES, ValidParameters.WAVES_POWER, ValidParameters.SWELL1]),
+            (ModelTypes.CAN_RDWPS_WAVE, [ValidParameters.WAVES, ValidParameters.WAVES_POWER, ValidParameters.SWELL1]),
+            (ModelTypes.CMEMS_WAVE, [ValidParameters.CURRENTS, ValidParameters.CURRENTS_TIDE]),
             (ModelTypes.NAMCONUS, [ValidParameters.TEMP, ValidParameters.WIND]),
             (ModelTypes.NAMHAWAII, [ValidParameters.TEMP, ValidParameters.WIND]),
             (ModelTypes.NAMALASKA, [ValidParameters.TEMP, ValidParameters.WIND]),
@@ -353,14 +357,67 @@ class TestModelSpecificParameters:
             model=ModelTypes.GFS_WAVE,
             parameters=[
                 ValidParameters.WAVES,
+                ValidParameters.WAVES_POWER,
                 ValidParameters.WIND_WAVES,
                 ValidParameters.SWELL1,
             ],
             key=mock_api_key,
         )
         assert "waves" in request.parameters
+        assert "wavesPower" in request.parameters
         assert "windWaves" in request.parameters
         assert "swell1" in request.parameters
+
+    def test_wave_parameters_valid_for_icon_wave(self, mock_api_key):
+        """Test that wave parameters are accepted for ICON Wave model."""
+        request = WindyPointRequest(
+            lat=0,
+            lon=0,
+            model=ModelTypes.ICON_WAVE,
+            parameters=[ValidParameters.WAVES, ValidParameters.WAVES_POWER, ValidParameters.SWELL1],
+            key=mock_api_key,
+        )
+        assert "waves" in request.parameters
+        assert "wavesPower" in request.parameters
+        assert "swell1" in request.parameters
+
+    def test_wave_parameters_valid_for_iconeu_wave(self, mock_api_key):
+        """Test that wave parameters are accepted for ICON EU Wave model."""
+        request = WindyPointRequest(
+            lat=0,
+            lon=0,
+            model=ModelTypes.ICONEU_WAVE,
+            parameters=[ValidParameters.WAVES, ValidParameters.WAVES_POWER, ValidParameters.SWELL1],
+            key=mock_api_key,
+        )
+        assert "waves" in request.parameters
+        assert "wavesPower" in request.parameters
+        assert "swell1" in request.parameters
+
+    def test_wave_parameters_valid_for_can_rdwps_wave(self, mock_api_key):
+        """Test that wave parameters are accepted for CAN RDWPS Wave model."""
+        request = WindyPointRequest(
+            lat=0,
+            lon=0,
+            model=ModelTypes.CAN_RDWPS_WAVE,
+            parameters=[ValidParameters.WAVES, ValidParameters.WAVES_POWER, ValidParameters.SWELL1],
+            key=mock_api_key,
+        )
+        assert "waves" in request.parameters
+        assert "wavesPower" in request.parameters
+        assert "swell1" in request.parameters
+
+    def test_current_parameters_valid_for_cmems_wave(self, mock_api_key):
+        """Test that current parameters are accepted for CMEMS Wave model."""
+        request = WindyPointRequest(
+            lat=0,
+            lon=0,
+            model=ModelTypes.CMEMS_WAVE,
+            parameters=[ValidParameters.CURRENTS, ValidParameters.CURRENTS_TIDE],
+            key=mock_api_key,
+        )
+        assert "currents" in request.parameters
+        assert "currentsTide" in request.parameters
 
     def test_wave_parameters_invalid_for_gfs(self, mock_api_key):
         """Test that wave parameters are filtered out for non-wave models."""

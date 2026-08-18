@@ -10,8 +10,8 @@ Python Windy API package for interacting with the Windy API. Currently only supp
 ## Features
 
 - **Point Forecast API**: Get detailed weather forecasts for any geographic location using latitude/longitude coordinates
-- **Multiple Weather Models**: Support for 10+ weather forecast models including GFS, ICON, ICON EU, ICON D2, AROME variants, NAM regional models, HRRR variants, GFS Wave, and CAMS air quality
-- **Comprehensive Parameters**: Access 23+ weather parameters including temperature, wind, precipitation, humidity, clouds, pressure, CAPE, visibility, cloud base, weather warnings, and more
+- **Multiple Weather Models**: Support for 21 forecast models including GFS, ICON, ICON EU, ICON D2, AROME variants, NAM regional models, HRRR variants, Canadian HRDPS, five sea models, and CAMS air quality
+- **Comprehensive Parameters**: Access 39 weather, marine and air quality parameters including temperature, wind, precipitation, humidity, clouds, pressure, CAPE, visibility, cloud base, weather warnings, waves, wave power, ocean currents, and pollen
 - **Automatic Validation**: Built-in parameter validation ensures only compatible parameters are requested for each model
 - **Async Support**: Full async/await support for concurrent API requests with `get_point_forecast_async()`
 - **Type Safety**: Strongly typed with Pydantic models for reliable data validation and IDE autocomplete
@@ -81,13 +81,23 @@ The following weather forecast models are supported:
 - `aromeAntilles` - AROME Antilles model
 - `aromeFrance` - AROME France model
 - `aromeReunion` - AROME Reunion model
-- `gfsWave` - GFS Wave model
 - `namConus` - NAM CONUS regional model
 - `namHawaii` - NAM Hawaii regional model
 - `namAlaska` - NAM Alaska regional model
 - `hrrrConus` - HRRR CONUS regional model
 - `hrrrAlaska` - HRRR Alaska regional model
 - `canHrdps` - Canadian HRDPS model
+
+Sea models:
+
+- `gfsWave` - GFS Wave model
+- `iconWave` - ICON Wave model (ICON-GWAM)
+- `iconEuWave` - ICON EU Wave model (ICON-EWAM)
+- `canRdwpsWave` - Canadian RDWPS Wave model
+- `cmems` - CMEMS ocean current model (Copernicus Marine Service)
+
+Air quality models:
+
 - `cams` - CAMS air quality model
 - `camsEu` - CAMS EU air quality model
 
@@ -172,6 +182,15 @@ wave_height = response.waves.height.values
 wave_period = response.waves.period.values
 wave_direction = response.waves.direction.values
 print(response.waves.height.units)  # "m"
+
+# Wave power
+print(response.wavesPower.values)
+
+# Ocean currents
+print(response.currents.u.values)
+print(response.currents.v.values)
+print(response.currentsTide.u.values)
+print(response.currentsTide.v.values)
 ```
 
 ### Detailed Examples
