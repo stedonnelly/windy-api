@@ -79,6 +79,7 @@ class WindyForecastResponse(BaseModel):
             | mclouds
             | hclouds
             | Pressure
+            | SurfaceDataAccessor
             | SO2SM
             | DustSM
             | COSC
@@ -155,6 +156,7 @@ class WindyForecastResponse(BaseModel):
             "past3hconvprecip": "convPrecip",
             "past3hsnowprecip": "snowPrecip",
             "gust": "windGust",
+            "weatherwarnings": "weatherWarnings",
             "aqi_us": "aqi",
             "chem_so2sm": "so2sm",
             "chem_dustsm": "dustsm",
@@ -195,6 +197,7 @@ class WindyForecastResponse(BaseModel):
         | mclouds
         | hclouds
         | Pressure
+        | SurfaceDataAccessor
         | SO2SM
         | DustSM
         | COSC
@@ -363,6 +366,15 @@ class WindyForecastResponse(BaseModel):
             if has_pressure:
                 if name not in self._accessor_cache:
                     self._accessor_cache[name] = Pressure(self)
+                return self._accessor_cache[name]
+
+        elif name == "weatherWarnings":
+            extra = getattr(self, "__pydantic_extra__", {}) or {}
+            has_weather_warnings = any(key.startswith("weatherwarnings-") for key in extra)
+
+            if has_weather_warnings:
+                if name not in self._accessor_cache:
+                    self._accessor_cache[name] = SurfaceDataAccessor(self, "weatherwarnings-surface")
                 return self._accessor_cache[name]
 
         elif name == "so2sm":

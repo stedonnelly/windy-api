@@ -10,16 +10,14 @@ Python Windy API package for interacting with the Windy API. Currently only supp
 ## Features
 
 - **Point Forecast API**: Get detailed weather forecasts for any geographic location using latitude/longitude coordinates
-- **Multiple Weather Models**: Support for 7+ weather forecast models including GFS, ICON EU, GFS Wave, NAM regional models, and CAMS air quality
-- **Comprehensive Parameters**: Access 20+ weather parameters including temperature, wind, precipitation, humidity, clouds, pressure, CAPE, and more
+- **Multiple Weather Models**: Support for 10+ weather forecast models including GFS, ICON, ICON EU, ICON D2, AROME variants, NAM regional models, HRRR variants, GFS Wave, and CAMS air quality
+- **Comprehensive Parameters**: Access 23+ weather parameters including temperature, wind, precipitation, humidity, clouds, pressure, CAPE, visibility, cloud base, weather warnings, and more
 - **Automatic Validation**: Built-in parameter validation ensures only compatible parameters are requested for each model
 - **Async Support**: Full async/await support for concurrent API requests with `get_point_forecast_async()`
 - **Type Safety**: Strongly typed with Pydantic models for reliable data validation and IDE autocomplete
 - **Intuitive Data Access**: Clean accessor pattern for accessing forecast data - use `response.temp["surface"]`
 - **Clean Representations**: Response objects display in a clean, readable format showing only high-level parameters
 - **Error Handling**: Clear error messages and exceptions for robust application development
-
-
 
 ## Installation
 
@@ -76,11 +74,20 @@ print(f"Wind unit: {response.wind.u.units}")
 The following weather forecast models are supported:
 
 - `gfs` - Global Forecast System (default)
-- `iconeu` - ICON EU regional model
-- `gfs_wave` - GFS Wave model
-- `namconus` - NAM CONUS regional model
-- `namhawaii` - NAM Hawaii regional model
-- `namalaska` - NAM Alaska regional model
+- `icon` - ICON global model
+- `iconEu` - ICON EU regional model
+- `iconD2` - ICON D2 regional model
+- `arome` - AROME base model
+- `aromeAntilles` - AROME Antilles model
+- `aromeFrance` - AROME France model
+- `aromeReunion` - AROME Reunion model
+- `gfsWave` - GFS Wave model
+- `namConus` - NAM CONUS regional model
+- `namHawaii` - NAM Hawaii regional model
+- `namAlaska` - NAM Alaska regional model
+- `hrrrConus` - HRRR CONUS regional model
+- `hrrrAlaska` - HRRR Alaska regional model
+- `canHrdps` - Canadian HRDPS model
 - `cams` - CAMS air quality model
 - `camsEu` - CAMS EU air quality model
 
@@ -101,6 +108,9 @@ Common weather parameters you can request:
 - `lclouds`, `mclouds`, `hclouds` - Low/medium/high clouds
 - `gh` - Geopotential height
 - `ptype` - Precipitation type
+- `cbase` - Cloud base height
+- `visibility` - Horizontal visibility at surface level
+- `weatherWarnings` - Significant weather warning code for the past 3 hours
 
 ### Model Parameter Checking
 
@@ -141,6 +151,10 @@ precip_unit = response.precip.units
 
 pressure_values = response.pressure.values
 pressure_unit = response.pressure.units
+
+cbase_values = response.cbase.values
+visibility_values = response.visibility.values
+weather_warning_values = response.weatherWarnings.values
 ```
 
 #### Complex Parameters (Wind, Waves)

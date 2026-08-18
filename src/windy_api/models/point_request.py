@@ -8,12 +8,20 @@ class ModelTypes(str, Enum):
     """Available weather forecast models"""
 
     AROME = "arome"
+    AROME_Antilles = "aromeAntilles"
+    AROME_France = "aromeFrance"
+    AROME_Reunion = "aromeReunion"
+    ICON = "icon"
+    ICOND2 = "iconD2"
     ICONEU = "iconEu"
     GFS = "gfs"
-    GFS_WAVE = "gfsWave"
     NAMCONUS = "namConus"
     NAMHAWAII = "namHawaii"
     NAMALASKA = "namAlaska"
+    HRRR_CONUS = "hrrrConus"
+    HRRR_ALASKA = "hrrrAlaska"
+    CAN_HRDPS = "canHrdps"
+    GFS_WAVE = "gfsWave"
     CAMS = "cams"
     CAMS_EU = "camsEu"
 
@@ -64,6 +72,11 @@ class ValidParameters(str, Enum):
     POLLEN_OLIVE = "pollenOlive"
     POLLEN_RAGWEED = "pollenRagweed"
 
+    # Additional parameters for ICON models
+    CBASE = "cbase"  # Cloud base height
+    VISIBILITY = "visibility"  # Visibility
+    WEATHER_WARNINGS = "weatherWarnings"  # Weather warnings
+
 
 class Levels(str, Enum):
     SURFACE = "surface"
@@ -87,17 +100,13 @@ COMMON_PARAMETERS = {
     ValidParameters.TEMP,
     ValidParameters.DEWPOINT,
     ValidParameters.PRECIP,
-    ValidParameters.CONV_PRECIP,
-    ValidParameters.SNOW_PRECIP,
     ValidParameters.WIND,
     ValidParameters.WIND_GUST,
     ValidParameters.CAPE,
-    ValidParameters.PTYPE,
     ValidParameters.LCLOUDS,
     ValidParameters.MCLOUDS,
     ValidParameters.HCLOUDS,
     ValidParameters.RH,
-    ValidParameters.GH,
     ValidParameters.PRESSURE,
 }
 
@@ -109,21 +118,56 @@ WAVE_PARAMETERS = {
     ValidParameters.SWELL2,
 }
 
-AROME_PARAMETERS = {
-    ValidParameters.TEMP,
-    ValidParameters.DEWPOINT,
-    ValidParameters.PRECIP,
-    ValidParameters.CONV_PRECIP,
-    ValidParameters.WIND,
-    ValidParameters.WIND_GUST,
-    ValidParameters.CAPE,
+AROME_COMMON_PARAMETERS = COMMON_PARAMETERS | {
+    ValidParameters.SNOW_PRECIP,
     ValidParameters.PTYPE,
-    ValidParameters.LCLOUDS,
-    ValidParameters.MCLOUDS,
-    ValidParameters.HCLOUDS,
-    ValidParameters.RH,
 }
 
+AROME_PARAMETERS = AROME_COMMON_PARAMETERS | {
+    ValidParameters.CONV_PRECIP,
+}
+
+ICON_PARAMETERS = COMMON_PARAMETERS | {
+    ValidParameters.CONV_PRECIP,
+    ValidParameters.SNOW_PRECIP,
+    ValidParameters.PTYPE,
+    ValidParameters.WEATHER_WARNINGS,
+}
+
+ICON_D2_PARAMETERS = ICON_PARAMETERS | {
+    ValidParameters.CBASE,
+    ValidParameters.VISIBILITY,
+}
+
+ICON_EU_PARAMETERS = ICON_PARAMETERS | {
+    ValidParameters.GH,
+    ValidParameters.CBASE,
+    ValidParameters.VISIBILITY,
+}
+
+
+GFS_PARAMETERS = COMMON_PARAMETERS | {
+    ValidParameters.CONV_PRECIP,
+    ValidParameters.SNOW_PRECIP,
+    ValidParameters.PTYPE,
+    ValidParameters.GH,
+}
+
+NAM_PARAMETERS = COMMON_PARAMETERS | {
+    ValidParameters.CONV_PRECIP,
+    ValidParameters.SNOW_PRECIP,
+    ValidParameters.PTYPE,
+    ValidParameters.GH,
+}
+
+HRRR_PARAMETERS = COMMON_PARAMETERS | {
+    ValidParameters.CONV_PRECIP,
+    ValidParameters.SNOW_PRECIP,
+}
+
+CAN_HRDPS_PARAMETERS = COMMON_PARAMETERS | {
+    ValidParameters.CONV_PRECIP,
+}
 # Atmospheric composition parameters
 ATMOSPHERIC_PARAMETERS = {
     ValidParameters.AQI,
@@ -151,24 +195,41 @@ CAMS_EU_PARAMETERS = ATMOSPHERIC_PARAMETERS | POLLEN_PARAMETERS
 # Model-specific parameter availability mapping
 MODEL_PARAMETER_MAP: dict[ModelTypes, set[ValidParameters]] = {
     ModelTypes.AROME: AROME_PARAMETERS,
-    ModelTypes.ICONEU: COMMON_PARAMETERS,
-    ModelTypes.GFS: COMMON_PARAMETERS,
-    ModelTypes.GFS_WAVE: WAVE_PARAMETERS,
-    ModelTypes.NAMCONUS: COMMON_PARAMETERS,
-    ModelTypes.NAMHAWAII: COMMON_PARAMETERS,
-    ModelTypes.NAMALASKA: COMMON_PARAMETERS,
+    ModelTypes.AROME_Antilles: AROME_COMMON_PARAMETERS,
+    ModelTypes.AROME_France: AROME_COMMON_PARAMETERS,
+    ModelTypes.AROME_Reunion: AROME_COMMON_PARAMETERS,
+    ModelTypes.ICON: ICON_PARAMETERS,
+    ModelTypes.ICOND2: ICON_D2_PARAMETERS,
+    ModelTypes.ICONEU: ICON_EU_PARAMETERS,
+    ModelTypes.GFS: GFS_PARAMETERS,
+    ModelTypes.NAMCONUS: NAM_PARAMETERS,
+    ModelTypes.NAMHAWAII: NAM_PARAMETERS,
+    ModelTypes.NAMALASKA: NAM_PARAMETERS,
+    ModelTypes.HRRR_CONUS: HRRR_PARAMETERS,
+    ModelTypes.HRRR_ALASKA: HRRR_PARAMETERS,
+    ModelTypes.CAN_HRDPS: CAN_HRDPS_PARAMETERS,
+    ModelTypes.GFS_WAVE: COMMON_PARAMETERS.union(WAVE_PARAMETERS),
     ModelTypes.CAMS: ATMOSPHERIC_PARAMETERS,
     ModelTypes.CAMS_EU: CAMS_EU_PARAMETERS,
 }
 
+
 MODEL_LEVELS_MAP: dict[ModelTypes, set[Levels]] = {
     ModelTypes.AROME: set(Levels),
+    ModelTypes.AROME_Antilles: set(Levels),
+    ModelTypes.AROME_France: set(Levels),
+    ModelTypes.AROME_Reunion: set(Levels),
     ModelTypes.ICONEU: set(Levels),
+    ModelTypes.ICOND2: set(Levels),
+    ModelTypes.ICON: set(Levels),
     ModelTypes.GFS: set(Levels),
     ModelTypes.GFS_WAVE: {Levels.SURFACE},
     ModelTypes.NAMCONUS: set(Levels),
     ModelTypes.NAMHAWAII: set(Levels),
     ModelTypes.NAMALASKA: set(Levels),
+    ModelTypes.HRRR_CONUS: set(Levels),
+    ModelTypes.HRRR_ALASKA: set(Levels),
+    ModelTypes.CAN_HRDPS: set(Levels),
     ModelTypes.CAMS: {Levels.SURFACE},
     ModelTypes.CAMS_EU: {Levels.SURFACE},
 }
@@ -178,8 +239,17 @@ class WindyPointRequest(BaseModel):
     """Request model for Windy Point Forecast API.
 
     Supports multiple weather models with model-specific parameter availability:
-    - GFS, ICONEU, NAM*: Common parameters only
-    - AROME: Arome-specific parameters
+    - All models support common parameters (temp, dewpoint, precip, wind, windGust, cape,
+    lclouds, mclouds, hclouds, rh, pressure)
+    - All AROME models support common + snowPrecip, ptype
+    - AROME supports additional common + snowPrecip, ptype, convPrecip
+    - ICON models support common + snowPrecip, ptype, convPrecip, weatherWarnings
+    - ICON D2 supports common + snowPrecip, ptype, convPrecip, weatherWarnings, cbase, visibility
+    - ICON EU supports common + snowPrecip, ptype, convPrecip, weatherWarnings, gh, cbase, visibility
+    - GFS supports common + snowPrecip, ptype, convPrecip, gh
+    - NAM models support common + snowPrecip, ptype, convPrecip, gh
+    - HRRR models support common + snowPrecip, convPrecip
+    - CAN HRDPS supports common + convPrecip
     - GFS_WAVE: Common + wave parameters (waves, windWaves, swell1-3)
     - CAMS: Air quality parameters (aqi, so2sm, dustsm, cosc, go3, no2, pm10, pm2p5)
     - CAMS_EU: All CAMS parameters + pollen (alder, birch, grass, mugwort, olive, ragweed)
@@ -201,10 +271,16 @@ class WindyPointRequest(BaseModel):
         default_factory=lambda: [ValidParameters.TEMP, ValidParameters.WIND],
         description=(
             "Weather parameters to retrieve. "
-            "Common (all models except AROME, gfsWave, cams): temp, dewpoint, precip, convPrecip, "
-            "snowPrecip, wind, windGust, cape, ptype, lclouds, mclouds, hclouds, rh, gh, pressure. "
-            "Arome-specific: temp, dewpoint, precip, convPrecip, wind, windGust, cape, ptype, "
-            "lclouds, mclouds, hclouds, rh."
+            "Common (all models except gfsWave, cams): temp, dewpoint, precip, wind, windGust, cape,"
+            "lclouds, mclouds, hclouds, rh, pressure. "
+            "AROME: snowPrecip, ptype, convPrecip. "
+            "ICON: snowPrecip, ptype, convPrecip, weatherWarnings. "
+            "ICON D2: cbase, visibility. "
+            "ICON EU: gh, cbase, visibility. "
+            "GFS: snowPrecip, ptype, convPrecip, gh. "
+            "NAM: snowPrecip, ptype, convPrecip, gh. "
+            "HRRR: snowPrecip, convPrecip. "
+            "CAN HRDPS: convPrecip. "
             "Wave (gfsWave only): waves, windWaves, swell1, swell2, swell3. "
             "Atmospheric (cams): aqi, so2sm, dustsm, cosc, go3, no2, pm10, pm2p5. "
             "Pollen (camsEu only): pollenAlder, pollenBirch, pollenGrass, pollenMugwort, pollenOlive, pollenRagweed."
