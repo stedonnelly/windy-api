@@ -89,6 +89,7 @@ The following weather forecast models are supported:
 - `hrrrAlaska` - HRRR Alaska regional model
 - `canHrdps` - Canadian HRDPS model
 - `cams` - CAMS air quality model
+- `camsEu` - CAMS EU air quality model
 
 ### Available Parameters
 

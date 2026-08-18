@@ -23,6 +23,7 @@ class ModelTypes(str, Enum):
     CAN_HRDPS = "canHrdps"
     GFS_WAVE = "gfsWave"
     CAMS = "cams"
+    CAMS_EU = "camsEu"
 
 
 class ValidParameters(str, Enum):
@@ -53,10 +54,23 @@ class ValidParameters(str, Enum):
     SWELL1 = "swell1"
     SWELL2 = "swell2"
 
-    # Additional atmospheric parameters (CAMS only)
-    SO2SM = "so2sm"  # Sulfur dioxide
-    DUSTSM = "dustsm"
-    COSC = "cosc"  # Carbon monoxide
+    # Air quality parameters (CAMS / camsEu)
+    AQI = "aqi"  # Air Quality Index (US standard, 0-500)
+    SO2SM = "so2sm"  # Sulfur dioxide surface mass
+    DUSTSM = "dustsm"  # Dust surface mass
+    COSC = "cosc"  # Carbon monoxide concentration
+    GO3 = "go3"  # Ground-level ozone concentration
+    NO2 = "no2"  # Nitrogen dioxide concentration
+    PM10 = "pm10"  # Particulate matter ≤10 µm
+    PM2P5 = "pm2p5"  # Fine particulate matter ≤2.5 µm
+
+    # Pollen parameters (camsEu only)
+    POLLEN_ALDER = "pollenAlder"
+    POLLEN_BIRCH = "pollenBirch"
+    POLLEN_GRASS = "pollenGrass"
+    POLLEN_MUGWORT = "pollenMugwort"
+    POLLEN_OLIVE = "pollenOlive"
+    POLLEN_RAGWEED = "pollenRagweed"
 
     # Additional parameters for ICON models
     CBASE = "cbase"  # Cloud base height
@@ -156,10 +170,26 @@ CAN_HRDPS_PARAMETERS = COMMON_PARAMETERS | {
 }
 # Atmospheric composition parameters
 ATMOSPHERIC_PARAMETERS = {
+    ValidParameters.AQI,
     ValidParameters.SO2SM,
     ValidParameters.DUSTSM,
     ValidParameters.COSC,
+    ValidParameters.GO3,
+    ValidParameters.NO2,
+    ValidParameters.PM10,
+    ValidParameters.PM2P5,
 }
+
+POLLEN_PARAMETERS = {
+    ValidParameters.POLLEN_ALDER,
+    ValidParameters.POLLEN_BIRCH,
+    ValidParameters.POLLEN_GRASS,
+    ValidParameters.POLLEN_MUGWORT,
+    ValidParameters.POLLEN_OLIVE,
+    ValidParameters.POLLEN_RAGWEED,
+}
+
+CAMS_EU_PARAMETERS = ATMOSPHERIC_PARAMETERS | POLLEN_PARAMETERS
 
 
 # Model-specific parameter availability mapping
@@ -180,6 +210,7 @@ MODEL_PARAMETER_MAP: dict[ModelTypes, set[ValidParameters]] = {
     ModelTypes.CAN_HRDPS: CAN_HRDPS_PARAMETERS,
     ModelTypes.GFS_WAVE: COMMON_PARAMETERS.union(WAVE_PARAMETERS),
     ModelTypes.CAMS: ATMOSPHERIC_PARAMETERS,
+    ModelTypes.CAMS_EU: CAMS_EU_PARAMETERS,
 }
 
 
@@ -200,6 +231,7 @@ MODEL_LEVELS_MAP: dict[ModelTypes, set[Levels]] = {
     ModelTypes.HRRR_ALASKA: set(Levels),
     ModelTypes.CAN_HRDPS: set(Levels),
     ModelTypes.CAMS: {Levels.SURFACE},
+    ModelTypes.CAMS_EU: {Levels.SURFACE},
 }
 
 
@@ -219,7 +251,8 @@ class WindyPointRequest(BaseModel):
     - HRRR models support common + snowPrecip, convPrecip
     - CAN HRDPS supports common + convPrecip
     - GFS_WAVE: Common + wave parameters (waves, windWaves, swell1-3)
-    - CAMS: Common + atmospheric parameters (so2sm, dustsm, cosc)
+    - CAMS: Air quality parameters (aqi, so2sm, dustsm, cosc, go3, no2, pm10, pm2p5)
+    - CAMS_EU: All CAMS parameters + pollen (alder, birch, grass, mugwort, olive, ragweed)
     """
 
     model_config = ConfigDict(use_enum_values=True)
@@ -249,7 +282,8 @@ class WindyPointRequest(BaseModel):
             "HRRR: snowPrecip, convPrecip. "
             "CAN HRDPS: convPrecip. "
             "Wave (gfsWave only): waves, windWaves, swell1, swell2, swell3. "
-            "Atmospheric (cams only): so2sm, dustsm, cosc"
+            "Atmospheric (cams): aqi, so2sm, dustsm, cosc, go3, no2, pm10, pm2p5. "
+            "Pollen (camsEu only): pollenAlder, pollenBirch, pollenGrass, pollenMugwort, pollenOlive, pollenRagweed."
         ),
     )
     levels: list[Levels] = Field(
