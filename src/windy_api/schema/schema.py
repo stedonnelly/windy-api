@@ -12,6 +12,7 @@ from .accessors import (
     Past3hSnowPrecip,
     Pressure,
     SeaCurrentsAccessor,
+    SurfaceDataAccessor,
     Swell1Accessor,
     Swell2Accessor,
     WaveAccessor,
@@ -82,9 +83,11 @@ class WindyForecastResponse(BaseModel):
             | mclouds
             | hclouds
             | Pressure
+            | SurfaceDataAccessor
             | SO2SM
             | DustSM
-            | COSC,
+            | COSC
+            | SurfaceDataAccessor,
         ] = {}
 
     @field_validator("ts", mode="before")
@@ -162,6 +165,17 @@ class WindyForecastResponse(BaseModel):
             "past3hconvprecip": "convPrecip",
             "past3hsnowprecip": "snowPrecip",
             "gust": "windGust",
+            "weatherwarnings": "weatherWarnings",
+            "aqi_us": "aqi",
+            "chem_so2sm": "so2sm",
+            "chem_dustsm": "dustsm",
+            "chem_cosc": "cosc",
+            "pollen_alder": "pollenAlder",
+            "pollen_birch": "pollenBirch",
+            "pollen_grass": "pollenGrass",
+            "pollen_mugwort": "pollenMugwort",
+            "pollen_olive": "pollenOlive",
+            "pollen_ragweed": "pollenRagweed",
         }
 
         for key in extra:
@@ -194,9 +208,11 @@ class WindyForecastResponse(BaseModel):
         | mclouds
         | hclouds
         | Pressure
+        | SurfaceDataAccessor
         | SO2SM
         | DustSM
         | COSC
+        | SurfaceDataAccessor
     ):
         """
         Dynamically create accessors for parameter names.
@@ -394,9 +410,18 @@ class WindyForecastResponse(BaseModel):
                     self._accessor_cache[name] = Pressure(self)
                 return self._accessor_cache[name]
 
+        elif name == "weatherWarnings":
+            extra = getattr(self, "__pydantic_extra__", {}) or {}
+            has_weather_warnings = any(key.startswith("weatherwarnings-") for key in extra)
+
+            if has_weather_warnings:
+                if name not in self._accessor_cache:
+                    self._accessor_cache[name] = SurfaceDataAccessor(self, "weatherwarnings-surface")
+                return self._accessor_cache[name]
+
         elif name == "so2sm":
             extra = getattr(self, "__pydantic_extra__", {}) or {}
-            has_so2sm = any(key.startswith("so2sm-") for key in extra)
+            has_so2sm = any(key.startswith("chem_so2sm-") for key in extra)
 
             if has_so2sm:
                 if name not in self._accessor_cache:
@@ -405,7 +430,7 @@ class WindyForecastResponse(BaseModel):
 
         elif name == "dustsm":
             extra = getattr(self, "__pydantic_extra__", {}) or {}
-            has_dustsm = any(key.startswith("dustsm-") for key in extra)
+            has_dustsm = any(key.startswith("chem_dustsm-") for key in extra)
 
             if has_dustsm:
                 if name not in self._accessor_cache:
@@ -414,11 +439,26 @@ class WindyForecastResponse(BaseModel):
 
         elif name == "cosc":
             extra = getattr(self, "__pydantic_extra__", {}) or {}
-            has_cosc = any(key.startswith("cosc-") for key in extra)
+            has_cosc = any(key.startswith("chem_cosc-") for key in extra)
 
             if has_cosc:
                 if name not in self._accessor_cache:
                     self._accessor_cache[name] = COSC(self)
+                return self._accessor_cache[name]
+
+        elif name == "aqi":
+            extra = getattr(self, "__pydantic_extra__", {}) or {}
+            if any(key.startswith("aqi_us-") for key in extra):
+                if name not in self._accessor_cache:
+                    self._accessor_cache[name] = SurfaceDataAccessor(self, "aqi_us-surface")
+                return self._accessor_cache[name]
+
+        elif name in {"pollenAlder", "pollenBirch", "pollenGrass", "pollenMugwort", "pollenOlive", "pollenRagweed"}:
+            raw_prefix = "pollen_" + name[6:].lower() + "-"
+            extra = getattr(self, "__pydantic_extra__", {}) or {}
+            if any(key.startswith(raw_prefix) for key in extra):
+                if name not in self._accessor_cache:
+                    self._accessor_cache[name] = SurfaceDataAccessor(self, raw_prefix + "surface")
                 return self._accessor_cache[name]
 
         # Check if this is a parameter by looking for matching keys in extra data

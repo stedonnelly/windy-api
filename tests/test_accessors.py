@@ -299,11 +299,11 @@ class TestSurfaceDataAccessor:
         assert response.pressure.units == "Pa"
 
     def test_so2sm(self):
-        """Test accessing SO2 surface mass."""
+        """Test accessing SO2 surface mass using real API response key."""
         data = {
             "ts": [1700000000000],
-            "units": {"so2sm-surface": "kg*m-2"},
-            "so2sm-surface": [0.0001],
+            "units": {"chem_so2sm-surface": "kg*m-2"},
+            "chem_so2sm-surface": [0.0001],
         }
         response = WindyForecastResponse(**data)
 
@@ -311,11 +311,11 @@ class TestSurfaceDataAccessor:
         assert response.so2sm.units == "kg*m-2"
 
     def test_dustsm(self):
-        """Test accessing dust surface mass."""
+        """Test accessing dust surface mass using real API response key."""
         data = {
             "ts": [1700000000000],
-            "units": {"dustsm-surface": "kg*m-2"},
-            "dustsm-surface": [0.0002],
+            "units": {"chem_dustsm-surface": "kg*m-2"},
+            "chem_dustsm-surface": [0.0002],
         }
         response = WindyForecastResponse(**data)
 
@@ -323,16 +323,212 @@ class TestSurfaceDataAccessor:
         assert response.dustsm.units == "kg*m-2"
 
     def test_cosc(self):
-        """Test accessing CO surface concentration."""
+        """Test accessing CO surface concentration using real API response key."""
         data = {
             "ts": [1700000000000],
-            "units": {"cosc-surface": "kg*m-3"},
-            "cosc-surface": [0.00001],
+            "units": {"chem_cosc-surface": "kg*m-3"},
+            "chem_cosc-surface": [0.00001],
         }
         response = WindyForecastResponse(**data)
 
         assert response.cosc.values == [0.00001]
         assert response.cosc.units == "kg*m-3"
+
+    def test_weather_warnings(self):
+        """Test accessing weather warnings via camelCase accessor."""
+        data = {
+            "ts": [1700000000000],
+            "units": {"weatherwarnings-surface": None},
+            "weatherwarnings-surface": [3],
+        }
+        response = WindyForecastResponse(**data)
+
+        assert response.weatherWarnings.values == [3]
+        assert response.weatherWarnings.units is None
+
+    def test_cbase_with_parameter_accessor(self):
+        """Test accessing cloud base height via standard parameter accessor."""
+        data = {
+            "ts": [1700000000000],
+            "units": {"cbase-surface": "m"},
+            "cbase-surface": [850.0],
+        }
+        response = WindyForecastResponse(**data)
+
+        assert response.cbase["surface"] == [850.0]
+        assert response.cbase.units == "m"
+
+    def test_visibility_with_parameter_accessor(self):
+        """Test accessing visibility via standard parameter accessor."""
+        data = {
+            "ts": [1700000000000],
+            "units": {"visibility-surface": "m"},
+            "visibility-surface": [12000.0],
+        }
+        response = WindyForecastResponse(**data)
+
+        assert response.visibility["surface"] == [12000.0]
+        assert response.visibility.units == "m"
+
+    def test_so2sm_in_available_parameters(self):
+        """Test that chem_so2sm-surface maps to so2sm in available_parameters."""
+        data = {
+            "ts": [1700000000000],
+            "units": {"chem_so2sm-surface": "kg*m-2"},
+            "chem_so2sm-surface": [0.0001],
+        }
+        response = WindyForecastResponse(**data)
+        assert "so2sm" in response.available_parameters()
+
+    def test_dustsm_in_available_parameters(self):
+        """Test that chem_dustsm-surface maps to dustsm in available_parameters."""
+        data = {
+            "ts": [1700000000000],
+            "units": {"chem_dustsm-surface": "kg*m-2"},
+            "chem_dustsm-surface": [0.0002],
+        }
+        response = WindyForecastResponse(**data)
+        assert "dustsm" in response.available_parameters()
+
+    def test_cosc_in_available_parameters(self):
+        """Test that chem_cosc-surface maps to cosc in available_parameters."""
+        data = {
+            "ts": [1700000000000],
+            "units": {"chem_cosc-surface": "kg*m-3"},
+            "chem_cosc-surface": [0.00001],
+        }
+        response = WindyForecastResponse(**data)
+        assert "cosc" in response.available_parameters()
+
+
+class TestAirQualityAccessors:
+    """Test air quality and pollen accessors."""
+
+    def test_aqi(self):
+        data = {
+            "ts": [1700000000000],
+            "units": {"aqi_us-surface": None},
+            "aqi_us-surface": [42],
+        }
+        response = WindyForecastResponse(**data)
+        assert response.aqi.values == [42]
+        assert response.aqi.units is None
+
+    def test_go3(self):
+        data = {
+            "ts": [1700000000000],
+            "units": {"go3-surface": "µg*m-3"},
+            "go3-surface": [85.0],
+        }
+        response = WindyForecastResponse(**data)
+        assert response.go3["surface"] == [85.0]
+        assert response.go3.units == "µg*m-3"
+
+    def test_no2(self):
+        data = {
+            "ts": [1700000000000],
+            "units": {"no2-surface": "µg*m-3"},
+            "no2-surface": [12.5],
+        }
+        response = WindyForecastResponse(**data)
+        assert response.no2["surface"] == [12.5]
+
+    def test_pm10(self):
+        data = {
+            "ts": [1700000000000],
+            "units": {"pm10-surface": "µg*m-3"},
+            "pm10-surface": [20.0],
+        }
+        response = WindyForecastResponse(**data)
+        assert response.pm10["surface"] == [20.0]
+
+    def test_pm2p5(self):
+        data = {
+            "ts": [1700000000000],
+            "units": {"pm2p5-surface": "µg*m-3"},
+            "pm2p5-surface": [8.0],
+        }
+        response = WindyForecastResponse(**data)
+        assert response.pm2p5["surface"] == [8.0]
+
+    def test_pollen_alder(self):
+        data = {
+            "ts": [1700000000000],
+            "units": {"pollen_alder-surface": "grains*m-3"},
+            "pollen_alder-surface": [5.0],
+        }
+        response = WindyForecastResponse(**data)
+        assert response.pollenAlder.values == [5.0]
+        assert response.pollenAlder.units == "grains*m-3"
+
+    def test_pollen_birch(self):
+        data = {
+            "ts": [1700000000000],
+            "units": {"pollen_birch-surface": "grains*m-3"},
+            "pollen_birch-surface": [120.0],
+        }
+        response = WindyForecastResponse(**data)
+        assert response.pollenBirch.values == [120.0]
+
+    def test_pollen_grass(self):
+        data = {
+            "ts": [1700000000000],
+            "units": {"pollen_grass-surface": "grains*m-3"},
+            "pollen_grass-surface": [30.0],
+        }
+        response = WindyForecastResponse(**data)
+        assert response.pollenGrass.values == [30.0]
+
+    def test_pollen_mugwort(self):
+        data = {
+            "ts": [1700000000000],
+            "units": {"pollen_mugwort-surface": "grains*m-3"},
+            "pollen_mugwort-surface": [3.0],
+        }
+        response = WindyForecastResponse(**data)
+        assert response.pollenMugwort.values == [3.0]
+
+    def test_pollen_olive(self):
+        data = {
+            "ts": [1700000000000],
+            "units": {"pollen_olive-surface": "grains*m-3"},
+            "pollen_olive-surface": [8.0],
+        }
+        response = WindyForecastResponse(**data)
+        assert response.pollenOlive.values == [8.0]
+
+    def test_pollen_ragweed(self):
+        data = {
+            "ts": [1700000000000],
+            "units": {"pollen_ragweed-surface": "grains*m-3"},
+            "pollen_ragweed-surface": [2.0],
+        }
+        response = WindyForecastResponse(**data)
+        assert response.pollenRagweed.values == [2.0]
+
+    def test_aqi_in_available_parameters(self):
+        data = {
+            "ts": [1700000000000],
+            "units": {"aqi_us-surface": None},
+            "aqi_us-surface": [42],
+        }
+        response = WindyForecastResponse(**data)
+        assert "aqi" in response.available_parameters()
+
+    def test_pollen_in_available_parameters(self):
+        data = {
+            "ts": [1700000000000],
+            "units": {
+                "pollen_grass-surface": "grains*m-3",
+                "pollen_birch-surface": "grains*m-3",
+            },
+            "pollen_grass-surface": [30.0],
+            "pollen_birch-surface": [120.0],
+        }
+        response = WindyForecastResponse(**data)
+        params = response.available_parameters()
+        assert "pollenGrass" in params
+        assert "pollenBirch" in params
 
 
 class TestWaveAccessors:
@@ -539,13 +735,13 @@ class TestAvailableParameters:
         data = {
             "ts": [1700000000000],
             "units": {
-                "so2sm-surface": "kg*m-2",
-                "dustsm-surface": "kg*m-2",
-                "cosc-surface": "kg*m-3",
+                "chem_so2sm-surface": "kg*m-2",
+                "chem_dustsm-surface": "kg*m-2",
+                "chem_cosc-surface": "kg*m-3",
             },
-            "so2sm-surface": [0.0001],
-            "dustsm-surface": [0.0002],
-            "cosc-surface": [0.00001],
+            "chem_so2sm-surface": [0.0001],
+            "chem_dustsm-surface": [0.0002],
+            "chem_cosc-surface": [0.00001],
         }
         response = WindyForecastResponse(**data)
 

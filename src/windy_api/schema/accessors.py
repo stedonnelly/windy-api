@@ -645,12 +645,12 @@ class SO2SM:
     @property
     def values(self) -> list[float | None] | None:
         """Access so2sm data."""
-        return self._response.get_data("so2sm-surface")
+        return self._response.get_data("chem_so2sm-surface")
 
     @property
     def units(self) -> str | None:
         """Get the unit for so2sm."""
-        return self._response.get_unit("so2sm-surface")
+        return self._response.get_unit("chem_so2sm-surface")
 
     def __repr__(self) -> str:
         return f"SO2SM(values={self.values}, units={self.units})"
@@ -670,12 +670,12 @@ class DustSM:
     @property
     def values(self) -> list[float | None] | None:
         """Access dustsm data."""
-        return self._response.get_data("dustsm-surface")
+        return self._response.get_data("chem_dustsm-surface")
 
     @property
     def units(self) -> str | None:
         """Get the unit for dustsm."""
-        return self._response.get_unit("dustsm-surface")
+        return self._response.get_unit("chem_dustsm-surface")
 
     def __repr__(self) -> str:
         return f"DustSM(values={self.values}, units={self.units})"
@@ -695,12 +695,12 @@ class COSC:
     @property
     def values(self) -> list[float | None] | None:
         """Access cosc data."""
-        return self._response.get_data("cosc-surface")
+        return self._response.get_data("chem_cosc-surface")
 
     @property
     def units(self) -> str | None:
         """Get the unit for cosc."""
-        return self._response.get_unit("cosc-surface")
+        return self._response.get_unit("chem_cosc-surface")
 
     def __repr__(self) -> str:
         return f"COSC(values={self.values}, units={self.units})"
